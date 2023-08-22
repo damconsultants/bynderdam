@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">  
+   <menu>
+       <add id="DamConsultants_BynderDAM::menu"
+           title="BynderDAM Sync. Log" module="DamConsultants_BynderDAM"
+           sortOrder="10"
+           resource="Magento_Backend::content"
+           />
+           <!-- START: new node -->
+       <add id="DamConsultants_BynderDAM::menu_item"
+           title="Cron Action Log" module="DamConsultants_BynderDAM"
+           sortOrder="10" parent="DamConsultants_BynderDAM::menu"
+           action="bynder/index/grid"
+           resource="DamConsultants_BynderDAM::menu_item"
+           />
+       <!-- END:   new node -->
+       <!-- START: new node -->
+       <add id="DamConsultants_BynderDAM::menu_item2"
+           title="Synchronization Log" module="DamConsultants_BynderDAM"
+           sortOrder="10" parent="DamConsultants_BynderDAM::menu"
+           action="bynder/index/sync"
+           resource="DamConsultants_BynderDAM::menu_item2"
+           />
+       <!-- END:   new node -->
+        <!-- START: new node -->
+       <add id="DamConsultants_BynderDAM::menu_item1"
+           title="BynderDAM MetaProperty " module="DamConsultants_BynderDAM"
+           sortOrder="10" parent="DamConsultants_BynderDAM::menu"
+           action="bynder/index/metaproperty"
+           resource="DamConsultants_BynderDAM::menu_item1"
+           />
+       <!-- END:   new node -->
+   </menu>
+</config> 
