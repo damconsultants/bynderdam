@@ -86,7 +86,7 @@
                 </field>
             </group>
             <group id="configurable_cron" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1"  showInStore="0">
-                <label>Featch Null SKU To Magento</label>
+                <label>Fetch Null SKU To Magento</label>
                 <field id="configurable_cron_info" translate="label" type="button" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
                     <frontend_model>DamConsultants\BynderDAM\Block\System\Config\FeatchNullSkuToMagento</frontend_model>
                 </field>
@@ -141,7 +141,7 @@
                     </depends>
                 </field>
             </group>
-            <group id="auto_replace_bynder" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
+            <!-- <group id="auto_replace_bynder" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>Auto Replace Data Product</label>
                 <field id="auto_replace_bynder_info" translate="label" type="button" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
                     <frontend_model>DamConsultants\BynderDAM\Block\System\Config\AutoReplaceDataProduct</frontend_model>
@@ -167,7 +167,7 @@
                         <field id="auto_replace_sku_frequency" separator=",">D,W,M</field>
                     </depends>
                 </field>
-            </group>    
+            </group>     -->
         </section>
         
     </system>

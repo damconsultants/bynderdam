@@ -2,15 +2,10 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
 	<group id="default">
 		<job instance="DamConsultants\BynderDAM\Cron\FeatchNullDataToMagento" method="execute" name="damConsultants_bynder_fetach_sku_null_for_magento">
-			<!-- <schedule>* * * * *</schedule> -->
 			<config_path>crontab/default/jobs/damConsultants_bynder_fetach_sku_null_for_magento/schedule/cron_expr</config_path>  
 		</job>
 		<job instance="DamConsultants\BynderDAM\Cron\AutoAddFromMagento" method="execute" name="damConsultants_bynder_auto_sku_add_magento">
 			<config_path>crontab/default/jobs/damConsultants_bynder_auto_sku_add_magento/schedule/cron_expr</config_path>
 		</job>
-		<!--<job instance="DamConsultants\BynderDAM\Cron\AutoReplaceFormMagento" method="execute" name="damConsultants_bynder_auto_sku_replace_magento_Test_Replace">
-			<schedule>* * * * *</schedule> 
-			<config_path>crontab/default/jobs/damConsultants_bynder_auto_sku_replace_magento/schedule/cron_expr</config_path> 
-		</job> -->
 	</group> 
 </config>

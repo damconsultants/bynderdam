@@ -5,6 +5,7 @@
             <argument name="collections" xsi:type="array">
                 <item name="bynder_index_listing_data_source" xsi:type="string">DamConsultants\BynderDAM\Model\ResourceModel\Collection\Grid\Collection</item>
                 <item name="bynder_index_sync_data_source" xsi:type="string">DamConsultants\BynderDAM\Model\ResourceModel\Collection\Grid\BynderConfigSyncDataCollection</item>
+                <item name="bynder_index_replace_data_source" xsi:type="string">DamConsultants\BynderDAM\Model\ResourceModel\Collection\Grid\BynderConfigSyncDataCollection</item>
             </argument>
         </arguments>
     </type>
@@ -18,6 +19,12 @@
         <arguments>
             <argument name="mainTable" xsi:type="string">bynder_config_sync_data</argument>
             <argument name="resourceModel" xsi:type="string">DamConsultants\BynderDAM\Model\ResourceModel\BynderConfigSyncData</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="DamConsultants\BynderDAM\Model\ResourceModel\Collection\Grid\BynderAutoReplaceDataCollection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">bynder_cron_replace_data</argument>
+            <argument name="resourceModel" xsi:type="string">DamConsultants\BynderDAM\Model\ResourceModel\BynderAutoReplaceData</argument>
         </arguments>
     </virtualType>
 </config>

@@ -21,16 +21,19 @@ class Button extends Field
      * @param Context $context
      * @param StoreManagerInterface $storeManager
      * @param \Magento\Backend\Helper\Data $HelperBackend
+     * @param \DamConsultants\BynderDAM\Helper\Data $datahelper
      * @param array $data
      */
     public function __construct(
         Context $context,
         StoreManagerInterface $storeManager,
         \Magento\Backend\Helper\Data $HelperBackend,
+        \DamConsultants\BynderDAM\Helper\Data $datahelper,
         array $data = []
     ) {
         $this->_storeManager = $storeManager;
         $this->HelperBackend = $HelperBackend;
+        $this->_datahelper = $datahelper;
         parent::__construct($context, $data);
     }
 
@@ -74,6 +77,16 @@ class Button extends Field
     public function getCustomUrl()
     {
         return $this->getUrl();
+    }
+
+    /**
+     * Get Iframe Url
+     *
+     * @return string
+     */
+    public function getIframeurl()
+    {
+        return $this->_datahelper->getIframeUrl();
     }
 
     /**

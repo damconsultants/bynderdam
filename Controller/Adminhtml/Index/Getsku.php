@@ -52,9 +52,10 @@ class Getsku extends \Magento\Backend\App\Action
         $productcollection = $this->collectionFactory->create()
             ->addAttributeToSelect('*')
             ->addAttributeToFilter('status', \Magento\Catalog\Model\Product\Attribute\Source\Status::STATUS_ENABLED);
-
-        foreach ($attribute as $value) {
-            $id[] = $value['attribute_set_id'];
+        if (count($attribute) > 0) {
+            foreach ($attribute as $value) {
+                $id[] = $value['attribute_set_id'];
+            }
         }
         $array = array_unique($id);
         foreach ($array as $ids) {

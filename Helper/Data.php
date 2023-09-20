@@ -48,6 +48,7 @@ class Data extends AbstractHelper
     public const RADIO_BUTTON = 'byndeimageconfig/bynder_image/selectimage';
     public const PRODUCT_SKU_LIMIT = 'cronimageconfig/set_limit_product_sku/product_sku_limt';
     public const API_CALLED = 'https://developer.thedamconsultants.com/';
+    public const IFRAME_URL = 'https://trello.thedamconsultants.com/bynder-registration';
 
     /**
      * Data Helper
@@ -180,6 +181,15 @@ class Data extends AbstractHelper
     public function getBynderDom()
     {
         return (string) $this->getConfig(self::BYNDER_DOMAIN);
+    }
+    /**
+     * Get Iframe Url
+     *
+     * @return $this
+     */
+    public function getIframeUrl()
+    {
+        return self::IFRAME_URL;
     }
     /**
      * Get Permanen Token

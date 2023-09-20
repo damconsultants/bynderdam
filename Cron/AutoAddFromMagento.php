@@ -24,7 +24,7 @@ class AutoAddFromMagento
      * @param \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory $collectionFactory
      * @param StoreManagerInterface $storeManagerInterface
      * @param \DamConsultants\BynderDAM\Helper\Data $DataHelper
-     * @param \DamConsultants\BynderDAM\Model\BynderSycDataFactory $byndersycData
+     * @param \DamConsultants\BynderDAM\Model\BynderAutoReplaceDataFactory $bynderAutoReplaceData,
      * @param Action $action
      * @param MetaPropertyCollectionFactory $metaPropertyCollectionFactory
      * @param BynderFactory $bynder
@@ -35,7 +35,7 @@ class AutoAddFromMagento
         \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory $collectionFactory,
         StoreManagerInterface $storeManagerInterface,
         \DamConsultants\BynderDAM\Helper\Data $DataHelper,
-        \DamConsultants\BynderDAM\Model\BynderSycDataFactory $byndersycData,
+        \DamConsultants\BynderDAM\Model\BynderAutoReplaceDataFactory $bynderAutoReplaceData,
         Action $action,
         MetaPropertyCollectionFactory $metaPropertyCollectionFactory,
         BynderFactory $bynder
@@ -46,7 +46,7 @@ class AutoAddFromMagento
         $this->collectionFactory = $collectionFactory;
         $this->datahelper = $DataHelper;
         $this->action = $action;
-        $this->_byndersycData = $byndersycData;
+        $this->_bynderAutoReplaceData = $bynderAutoReplaceData;
         $this->metaPropertyCollectionFactory = $metaPropertyCollectionFactory;
         $this->storeManagerInterface = $storeManagerInterface;
         $this->bynder = $bynder;
@@ -112,39 +112,27 @@ class AutoAddFromMagento
                                     $insert_data = [
                                         "sku" => $sku,
                                         "message" => $e->getMessage(),
-                                        "data_type" => "",
                                         'media_id' => "",
-                                        'remove_for_magento' => '',
-                                        'added_on_cron_compactview' => '',
-                                        "lable" => "0"
+                                        "data_type" => ""
                                     ];
                                     $this->getInsertDataTable($insert_data);
-                                    $this->updateBynderCronSync($sku);
                                 }
                                 
                             } else {
                                 $insert_data = [
                                     "sku" => $sku,
-                                    "message" => $convert_array['data'],
-                                    "data_type" => "",
+                                    "message" => $e->getMessage(),
                                     'media_id' => "",
-                                    'remove_for_magento' => '',
-                                    'added_on_cron_compactview' => '',
-                                    "lable" => "0"
+                                    "data_type" => ""
                                 ];
                                 $this->getInsertDataTable($insert_data);
-
-                                $this->updateBynderCronSync($sku);
                             }
                         } else {
                             $insert_data = [
                                 "sku" => $sku,
                                 "message" => 'Please Select The Metaproperty First.....',
-                                "data_type" => "",
                                 'media_id' => "",
-                                'remove_for_magento' => '',
-                                'added_on_cron_compactview' => '',
-                                "lable" => "0"
+                                "data_type" => ""
                             ];
                             $this->getInsertDataTable($insert_data);
                         }
@@ -152,11 +140,8 @@ class AutoAddFromMagento
                         $insert_data = [
                             "sku" => $sku,
                             "message" => "Something problem in DAM side please contact to developer.",
-                            "data_type" => "",
                             'media_id' => "",
-                            'remove_for_magento' => '',
-                            'added_on_cron_compactview' => '',
-                            "lable" => "0"
+                            "data_type" => ""
                         ];
                         $this->getInsertDataTable($insert_data);
                     }
@@ -255,15 +240,12 @@ class AutoAddFromMagento
      */
     public function getInsertDataTable($insert_data)
     {
-        $model = $this->_byndersycData->create();
+        $model = $this->_bynderAutoReplaceData->create();
         $data_image_data = [
             'sku' => $insert_data['sku'],
             'bynder_data' =>$insert_data['message'],
-            'bynder_data_type' => $insert_data['data_type'],
             'media_id' => $insert_data['media_id'],
-            'remove_for_magento' => $insert_data['remove_for_magento'],
-            'added_on_cron_compactview' => $insert_data['added_on_cron_compactview'],
-            'lable' => $insert_data['lable']
+            'bynder_data_type' => $insert_data['data_type']
         ];
         
         $model->setData($data_image_data);
@@ -302,14 +284,24 @@ class AutoAddFromMagento
                 if (count($bynder_image_role) > 0) {
                     foreach ($bynder_image_role as $m_bynder_role) {
                         if ($m_bynder_role == 0) {
-                            $new_image_role = ['Base', 'Small', 'Thumbnail'];
+                            $new_image_role = ['Base', 'Small', 'Thumbnail', 'Swatch'];
                             $alt_text_vl = $data_value["thumbnails"]["img_alt_text"];
                             if (is_array($data_value["thumbnails"]["img_alt_text"])) {
                                 $alt_text_vl = implode(" ", $data_value["thumbnails"]["img_alt_text"]);
                             }
                             $new_bynder_alt_text[] = (strlen($alt_text_vl) > 0)?$alt_text_vl."\n":"###\n";
+                            $new_bynder_mediaid_text[] = $bynder_media_id;
+                        } else {
+                            $new_magento_role_list[] = "###"."\n";
+                            /* this part added because sometime role not avaiable but alt text will be there*/
+                            $alt_text_vl = $data_value["thumbnails"]["img_alt_text"];
+                            if (!empty($alt_text_vl)) {
+                                $new_bynder_alt_text[] = $alt_text_vl."\n";
+                            } else {
+                                $new_bynder_alt_text[] = "###\n";
+                            }
+                            $new_bynder_mediaid_text[] = $bynder_media_id."\n";
                         }
-                        $new_bynder_mediaid_text[] = $bynder_media_id;
                     }
                 } else {
                     $new_magento_role_list[] = "###"."\n";
@@ -424,7 +416,6 @@ class AutoAddFromMagento
         $image = [];
         $video = [];
         $select_attribute = "image";
-        $model = $this->_byndersycData->create();
         $image_detail = [];
         $video_detail = [];
         try {
@@ -436,7 +427,6 @@ class AutoAddFromMagento
             $doc_value = $_product->getBynderDocument();
             $auto_replace = $_product->getBynderAutoReplace();
             $bynder_media_ids = $bynder_media_id[$product_sku_key];
-            //if ($select_attribute == "image") {
             if (!empty($image_value) && $auto_replace == null) {
                 $new_image_array = explode("\n", $img_json);
                 
@@ -488,6 +478,13 @@ class AutoAddFromMagento
                                     "bynder_md_id" => $bynder_media_ids[$vv],
                                     "is_import" => 0
                                 ];
+                                $data_image_data = [
+                                    'sku' => $product_sku_key,
+                                    'message' => $new_image_value,
+                                    'media_id' => $bynder_media_ids[$vv],
+                                    'data_type' => '1'
+                                ];
+                                $this->getInsertDataTable($data_image_data);
                                 if (count($item_old_value) > 0) {
                                     foreach ($item_old_value as $kv => $img) {
                                         if ($img['item_type'] == "IMAGE") {
@@ -538,6 +535,13 @@ class AutoAddFromMagento
                                     "thum_url" => $thum_url[1],
                                     "bynder_md_id" => $bynder_media_ids[$vv]
                                 ];
+                                $data_image_data = [
+                                    'sku' => $product_sku_key,
+                                    'message' => $item_url[0],
+                                    'media_id' => $bynder_media_ids[$vv],
+                                    'data_type' => '3'
+                                ];
+                                $this->getInsertDataTable($data_image_data);
                             }
                         }
                     }
@@ -549,33 +553,55 @@ class AutoAddFromMagento
                     }
                 }
                 $logger->info("d_img_roll -> ". json_encode($d_img_roll));
+                $i_img_roll = "";
+                $image_link = "";
                 if (count($image_detail) > 0) {
                     foreach ($image_detail as $img) {
                         $image[] = $img['item_url'];
+                        if(!empty($img['image_role'])) {
+                            $image_link = $img['item_url'];
+                            $i_img_roll = $img['image_role'];
+                        }
                     }
                 }
+                $logger->info("i_img_roll -> ". json_encode($i_img_roll));
+                $logger->info("image_link -> ". $image_link);
                 if (count($video_detail) > 0) {
                     foreach ($video_detail as $video) {
                         $video[] = $video['item_url'];
                     }
                 }
-                foreach ($item_old_value as $img) {
+                foreach ($item_old_value as $key1 => $img) {
                     if ($img['item_type'] == 'IMAGE') {
                         if (in_array($img['item_url'], $image)) {
                             if (!empty($d_img_roll)) {
                                 $roll = [];
                             } else {
-                                $roll = $img['image_role'];
+                                $roll = $image_detail[$key1]['image_role'];
                             }
                             $new_image_detail[] = [
                                 "item_url" => $img['item_url'],
-                                "alt_text" => $img['alt_text'],
+                                "alt_text" => $image_detail[$key1]['alt_text'],
                                 "image_role" => $roll,
                                 "item_type" => $img['item_type'],
                                 "thum_url" => $img['thum_url'],
                                 "bynder_md_id" => $img['bynder_md_id'],
                                 "is_import" => $img['is_import']
                             ];
+                        }
+                        $total_new_value = count($new_image_detail);
+                        if ($total_new_value > 1) {
+                            foreach ($new_image_detail as $nn => $n_img) {
+                                if ($n_img['item_type'] == "IMAGE" && $nn != ($total_new_value - 1)) {
+                                    if ($new_magento_role_option_array[$key1] != "###") {
+                                        $new_mg_role_array = (array)$new_magento_role_option_array[$key1];
+                                        if (count($n_img["image_role"]) > 0 && count($new_mg_role_array) > 0) {
+                                            $result_val=array_diff($n_img["image_role"], $new_mg_role_array);
+                                            $new_image_detail[$nn]["image_role"] = $result_val;
+                                        }
+                                    }
+                                }
+                            }
                         }
                     } else {
                         if (count($video) > 0) {
@@ -622,38 +648,14 @@ class AutoAddFromMagento
                 );
             }
         } catch (Exception $e) {
-            $insert_data = [
-                "sku" => $product_sku_key,
-                "message" => $e->getMessage(),
-                "data_type" => "",
-                'media_id' => "",
-                'remove_for_magento' => '',
-                'added_on_cron_compactview' => '',
-                "lable" => "0"
+            $logger->info("error => ". $e->getMessage());
+            $data_image_data = [
+                'sku' => $product_sku_key,
+                'message' => $e->getMessage(),
+                'media_id' => '',
+                'data_type' => ''
             ];
-            $this->getInsertDataTable($insert_data);
+            $this->getInsertDataTable($data_image_data);
         }
-    }
-
-    /**
-     * Update Bynder cron sync status
-     *
-     * @param string $sku
-     */
-    public function updateBynderCronSync($sku)
-    {
-        $updated_values = [
-            'bynder_cron_sync' => 2
-        ];
-
-        $storeId = $this->getMyStoreId();
-        $_product = $this->_productRepository->get($sku);
-        $product_ids = $_product->getId();
-
-        $this->action->updateAttributes(
-            [$product_ids],
-            $updated_values,
-            $storeId
-        );
     }
 }

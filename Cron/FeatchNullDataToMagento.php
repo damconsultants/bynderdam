@@ -257,7 +257,7 @@ class FeatchNullDataToMagento
                 if (count($bynder_image_role) > 0) {
                     foreach ($bynder_image_role as $m_bynder_role) {
                         if ($m_bynder_role == 0) {
-                            $new_image_role = ['Base', 'Small', 'Thumbnail'];
+                            $new_image_role = ['Base', 'Small', 'Thumbnail', 'Swatch'];
                             $alt_text_vl = $data_value["thumbnails"]["img_alt_text"];
                             if (is_array($data_value["thumbnails"]["img_alt_text"])) {
                                 $alt_text_vl = implode(" ", $data_value["thumbnails"]["img_alt_text"]);
@@ -433,6 +433,20 @@ class FeatchNullDataToMagento
                             ];
                             $this->getInsertDataTable($data_video_data);
         
+                        }
+                        $total_new_value = count($image_detail);
+                        if ($total_new_value > 1) {
+                            foreach ($image_detail as $nn => $n_img) {
+                                if ($n_img['item_type'] == "IMAGE" && $nn != ($total_new_value - 1)) {
+                                    if ($new_magento_role_option_array[$vv] != "###") {
+                                        $new_mg_role_array = (array)$new_magento_role_option_array[$vv];
+                                        if (count($n_img["image_role"]) > 0 && count($new_mg_role_array) > 0) {
+                                            $result_val=array_diff($n_img["image_role"], $new_mg_role_array);
+                                            $image_detail[$nn]["image_role"] = $result_val;
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }

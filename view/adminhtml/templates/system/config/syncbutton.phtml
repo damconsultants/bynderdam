@@ -8,6 +8,7 @@
         $('#bt_id_1').click(function() {
             var product_sku = $('textarea#byndersyncdata_bynder_sync_data_sku').val();
             var select_attribute = $('select#byndersyncdata_bynder_sync_data_select').val();
+            console.log(select_attribute);
             var params = {
                 product_sku: product_sku,
                 select_attribute: select_attribute

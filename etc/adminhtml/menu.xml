@@ -15,6 +15,14 @@
            resource="DamConsultants_BynderDAM::menu_item"
            />
        <!-- END:   new node -->
+        <!-- START: new node -->
+       <add id="DamConsultants_BynderDAM::menu_item3"
+           title="Replace Cron Action Log" module="DamConsultants_BynderDAM"
+           sortOrder="10" parent="DamConsultants_BynderDAM::menu"
+           action="bynder/index/replacecrongrid"
+           resource="DamConsultants_BynderDAM::menu_item3"
+           />
+       <!-- END:   new node -->
        <!-- START: new node -->
        <add id="DamConsultants_BynderDAM::menu_item2"
            title="Synchronization Log" module="DamConsultants_BynderDAM"
