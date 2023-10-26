@@ -262,9 +262,23 @@ class FeatchNullDataToMagento
                             if (is_array($data_value["thumbnails"]["img_alt_text"])) {
                                 $alt_text_vl = implode(" ", $data_value["thumbnails"]["img_alt_text"]);
                             }
-                            $new_bynder_alt_text[] = (strlen($alt_text_vl) > 0)?$alt_text_vl."\n":"###\n";
+                            if(empty($alt_text_vl)){
+                                $new_bynder_alt_text[] = "###\n";    
+                            }else{
+                                $new_bynder_alt_text[] = $alt_text_vl."\n";
+                            }
+                            $new_bynder_mediaid_text[] = $bynder_media_id;
+                        } else {
+                            $new_magento_role_list[] = "###"."\n";
+                            /* this part added because sometime role not avaiable but alt text will be there*/
+                            $alt_text_vl = $data_value["thumbnails"]["img_alt_text"];
+                            if (!empty($alt_text_vl)) {
+                                $new_bynder_alt_text[] = $alt_text_vl."\n";
+                            } else {
+                                $new_bynder_alt_text[] = "###\n";
+                            }
+                            $new_bynder_mediaid_text[] = $bynder_media_id."\n";
                         }
-                        $new_bynder_mediaid_text[] = $bynder_media_id;
                     }
                 } else {
                     $new_magento_role_list[] = "###"."\n";

@@ -92,18 +92,17 @@ class ImportImage extends \Magento\Framework\App\Action\Action
                             $file_name = str_replace("%20", " ", $file_name);
                             $img_url = $img_dir . $file_name;
                             $roll = [];
-                            if (in_array('Base', $item['image_role']) &&
-                                    in_array('Small', $item['image_role']) &&
-                                    in_array('Thumbnail', $item['image_role'])) {
-                                $roll = ['image', 'small_image','thumbnail'];
-                            } elseif (in_array('Base', $item['image_role']) && in_array('Small', $item['image_role'])) {
-                                $roll = ['image', 'small_image'];
-                            } elseif (in_array('Small', $item['image_role']) &&
-                                    in_array('Thumbnail', $item['image_role'])) {
-                                $roll = ['small_image', 'thumbnail'];
-                            } elseif (in_array('Base', $item['image_role']) &&
-                                    in_array('Thumbnail', $item['image_role'])) {
-                                $roll = ['image', 'thumbnail'];
+                            if (in_array('Base', $item['image_role'])){
+                                array_push($roll,"image");
+                            }
+                            if (in_array('Small', $item['image_role'])){
+                                array_push($roll,"small_image");
+                            }
+                            if (in_array('Thumbnail', $item['image_role'])){
+                                array_push($roll,"thumbnail");
+                            }
+                            if (in_array('Swatch', $item['image_role'])){
+                                array_push($roll,"swatch_image");
                             }
                             $this->file->write(
                                 $img_url,
@@ -128,6 +127,15 @@ class ImportImage extends \Magento\Framework\App\Action\Action
                     }
                 }
             }
+            $array_json = json_encode($img_array, true);
+            $updated_values = [
+                'bynder_multi_img' => $array_json,
+            ];
+            $this->productActionObject->updateAttributes(
+                [$id],
+                $updated_values,
+                $storeId
+            );
             $res_data = [];
             $res_data['data']  = $img_array;
             $res_data['status'] = 1;

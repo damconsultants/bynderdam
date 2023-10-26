@@ -52,6 +52,19 @@
                 </item>
                 </argument>
             </action>
+            <action name="resync">
+                <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="type" xsi:type="string">resync</item>
+                    <item name="label" xsi:type="string" translate="true">Re-Sync</item>
+                    <item name="url" xsi:type="url" path="bynder/index/massresyncdata"/>
+                    <item name="confirm" xsi:type="array">
+                        <item name="title" xsi:type="string" translate="true">Re-Sync Data?</item>
+                        <item name="message" xsi:type="string" translate="true">Are you sure you want to Re-Sync the selected Data?</item>
+                    </item>
+                </item>
+                </argument>
+            </action>
         </massaction>
         <bookmark name="bookmarks">
             <argument name="data" xsi:type="array">
