@@ -35,6 +35,7 @@ class MassResyncData extends Action
         \DamConsultants\BynderDAM\Model\BynderSycDataFactory $bynderFactory,
         \Magento\Catalog\Model\ProductRepository $productRepository,
         \Magento\Catalog\Model\Product\Action $action,
+		\Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder,
         \Magento\Store\Model\StoreManagerInterface $storeManagerInterface
     ) {
         $this->filter = $filter;
@@ -42,6 +43,7 @@ class MassResyncData extends Action
         $this->bynderFactory = $bynderFactory;
         $this->_productRepository = $productRepository;
         $this->action = $action;
+		$this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->storeManagerInterface = $storeManagerInterface;
         parent::__construct($context);
     }
@@ -55,16 +57,31 @@ class MassResyncData extends Action
             $collection = $this->filter->getCollection($this->collectionFactory->create());
             $storeId = $this->storeManagerInterface->getStore()->getId();
             $count = 0;
+            $not_exist_skus = "";
             foreach ($collection as $model) {
-                if ($model->getLable() == 0) {
-                    $_product = $this->_productRepository->get($model->getSku());
-                    $product_ids[] = $_product->getId();
-                    $model = $this->bynderFactory->create()->load($model->getId());
-                    $model->setLable('2');
-                    $model->save();
-                    $count++;
-                }
+				$searchCriteria = $this->searchCriteriaBuilder->addFilter("sku", $model->getSku(), 'eq')->create();
+				$products = $this->_productRepository->getList($searchCriteria);
+				$items = $products->getItems();
+				if (count($items) != 0 ) {
+					if ($model->getLable() == 0) {
+						$_product = $this->_productRepository->get($model->getSku());
+						$product_ids[] = $_product->getId();
+						$model = $this->bynderFactory->create()->load($model->getId());
+						$model->setLable('2');
+						$model->save();
+						$count++;
+					}
+				} else {
+                    if($not_exist_skus == ""){
+                        $not_exist_skus = $model->getSku();
+                    }else{
+                        $not_exist_skus .= ",".$model->getSku();
+                    }
+				}
             }
+            if($not_exist_skus != ""){
+                $this->messageManager->addSuccessMessage(__('This SKU ('. $not_exist_skus .') not available in Products list.'));
+            } 
             $updated_values = [
                 'bynder_cron_sync' => null
             ];

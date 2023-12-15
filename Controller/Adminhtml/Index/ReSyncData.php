@@ -24,11 +24,13 @@ class ReSyncData extends Action
         \DamConsultants\BynderDAM\Model\BynderSycDataFactory $BynderSycDataFactory,
         \Magento\Catalog\Model\Product\Action $action,
         \Magento\Catalog\Model\ProductRepository $productRepository,
+		\Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder,
         \Magento\Store\Model\StoreManagerInterface $storeManagerInterface
     ) {
         $this->bynderSycDataFactory = $BynderSycDataFactory;
         $this->_productRepository = $productRepository;
         $this->action = $action;
+		$this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->storeManagerInterface = $storeManagerInterface;
         parent::__construct($context);
     }
@@ -47,19 +49,26 @@ class ReSyncData extends Action
             $updated_values = [
                 'bynder_cron_sync' => null
             ];
-            $_product = $this->_productRepository->get($sku);
-            $product_ids = $_product->getId();
-
-            $this->action->updateAttributes(
-                [$product_ids],
-                $updated_values,
-                $storeId
-            );
-            $syncModel->setLable('2');
-            $syncModel->save();
-            $this->messageManager->addSuccessMessage(__('SKU ('. $sku.') will re-sync again.'));
+			$searchCriteria = $this->searchCriteriaBuilder->addFilter("sku", $sku, 'eq')->create();
+			$products = $this->_productRepository->getList($searchCriteria);
+			$Items = $products->getItems();
+			if (count($Items) != 0 ) {
+				$_product = $this->_productRepository->get($sku);
+				$product_ids = $_product->getId();
+			
+				$this->action->updateAttributes(
+					[$product_ids],
+					$updated_values,
+					$storeId
+				);
+				$syncModel->setLable('2');
+				$syncModel->save();
+				$this->messageManager->addSuccessMessage(__('SKU ('. $sku.') will re-sync again.'));
+			} else {
+				$this->messageManager->addSuccessMessage(__('This SKU ('. $sku.') not available in Products List.'));
+			}
         } catch (\Exception $e) {
-            $this->messageManager->addErrorMessage($e->getMessage());
+            $this->messageManager->addErrorMessage(__('This SKU ('. $sku.') not available in Products List.'));
         }
         return $resultRedirect->setPath('bynder/index/grid');
     }
