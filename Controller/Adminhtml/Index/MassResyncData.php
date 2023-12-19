@@ -58,6 +58,7 @@ class MassResyncData extends Action
             $storeId = $this->storeManagerInterface->getStore()->getId();
             $count = 0;
             $not_exist_skus = "";
+            $product_ids = [];
             foreach ($collection as $model) {
 				$searchCriteria = $this->searchCriteriaBuilder->addFilter("sku", $model->getSku(), 'eq')->create();
 				$products = $this->_productRepository->getList($searchCriteria);
@@ -85,12 +86,14 @@ class MassResyncData extends Action
             $updated_values = [
                 'bynder_cron_sync' => null
             ];
-            $this->action->updateAttributes(
-                $product_ids,
-                $updated_values,
-                $storeId
-            );
-            $this->messageManager->addSuccess(__('A total of %1 data(s) have been Re-Sync.', $count));
+            if(count($product_ids) > 0){
+                $this->action->updateAttributes(
+                    $product_ids,
+                    $updated_values,
+                    $storeId
+                );
+                $this->messageManager->addSuccess(__('A total of %1 data(s) have been Re-Sync.', $count));
+            }
         } catch (\Exception $e) {
             $this->messageManager->addError(__($e->getMessage()));
         }
