@@ -58,6 +58,10 @@ class FeatchNullDataToMagento
      */
     public function execute()
     {
+		$enable = $this->datahelper->getFetchCronEnable();
+		if (!$enable) {
+			return false;
+		}
         $product_collection = $this->collectionFactory->create();
         $product_sku_limit = (int)$this->datahelper->getProductSkuLimitConfig();
         if (!empty($product_sku_limit)) {
