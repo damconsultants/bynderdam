@@ -779,7 +779,7 @@ $get_base_url = $block->getBaseUrl();
                
                 var new_final_array = [];
                 
-                if(all_selected_images != ''){
+                if(all_selected_images.length > 0){
                     
                     jQuery.each(all_selected_images,function(k,v){
                         
@@ -915,35 +915,64 @@ $get_base_url = $block->getBaseUrl();
                             });
                         //});
                     } else {
-                        var myJsonString = JSON.stringify(all_selected_images);
+						if (all_selected_images != '') {
+                            var myJsonString = JSON.stringify(all_selected_images);
                             jQuery('textarea[name="product[bynder_multi_img]"]').val(myJsonString);
-                            jQuery('textarea[name="product[bynder_videos]"]').val("");
-                            /*document.cookie = "bynder_image=" + myJsonString + "; path=/;";*/
-                            var image_coockie_id = 0;
-                            try{
-                                image_coockie_id = Cookies.get('image_coockie_id');
-                            }catch(err){
-                                document.cookie = "image_coockie_id=" + image_coockie_id + "; path=/;";
-                            }
-                            var product_id = '<?= $block->escapeHtml($product_id); ?>';
-                            $.ajax({
-                                url: add_temp_data,
-                                showLoader: true,
-                                data: {
-                                    product_id: product_id,
-                                    image:myJsonString,
-                                    image_coockie_id:image_coockie_id
-                                },
-                                success: function (res) {
-                                    /* success data*/
-                                },
-                            });
+                        } else {
+                            jQuery('textarea[name="product[bynder_multi_img]"]').val("");
+                        }
+                    
+                        jQuery('textarea[name="product[bynder_videos]"]').val("");
+                        /*document.cookie = "bynder_image=" + myJsonString + "; path=/;";*/
+                        var image_coockie_id = 0;
+                        try{
+                            image_coockie_id = Cookies.get('image_coockie_id');
+                        }catch(err){
+                            document.cookie = "image_coockie_id=" + image_coockie_id + "; path=/;";
+                        }
+                        var product_id = '<?= $block->escapeHtml($product_id); ?>';
+                        $.ajax({
+                            url: add_temp_data,
+                            showLoader: true,
+                            data: {
+                                product_id: product_id,
+                                image:myJsonString,
+                                image_coockie_id:image_coockie_id
+                            },
+                            success: function (res) {
+                                /* success data*/
+                            },
+                        });
                     }
                 }else{
-                    var myJsonString = "";
-                    jQuery('textarea[name="product[bynder_multi_img]"]').val(myJsonString);
+                    if (all_selected_images != '') {
+                        var myJsonString = JSON.stringify(all_selected_images);
+                        jQuery('textarea[name="product[bynder_multi_img]"]').val(myJsonString);
+                    } else {
+                        jQuery('textarea[name="product[bynder_multi_img]"]').val("");
+                    }
+                
                     jQuery('textarea[name="product[bynder_videos]"]').val("");
-                    document.cookie = "bynder_image=" + myJsonString + "; path=/;";
+                    /*document.cookie = "bynder_image=" + myJsonString + "; path=/;";*/
+                    var image_coockie_id = 0;
+                    try{
+                        image_coockie_id = Cookies.get('image_coockie_id');
+                    }catch(err){
+                        document.cookie = "image_coockie_id=" + image_coockie_id + "; path=/;";
+                    }
+                    var product_id = '<?= $block->escapeHtml($product_id); ?>';
+                    $.ajax({
+                        url: add_temp_data,
+                        showLoader: true,
+                        data: {
+                            product_id: product_id,
+                            image:myJsonString,
+                            image_coockie_id:image_coockie_id
+                        },
+                        success: function (res) {
+                            /* success data*/
+                        },
+                    });
                 }
         });
         jQuery('#import_image_bynder').click(function () {

@@ -462,10 +462,11 @@ class Psku extends \Magento\Backend\App\Action
                     $old_video_detail = [];
                     $new_image_detail = [];
                     foreach ($item_old_value as $key1 => $img) {
+						
                         if ($img['item_type'] == 'IMAGE') {
-                            if (in_array($img['item_url'], $image)) {
-                                if (!empty($d_img_roll)) {
-                                    $roll = [];
+                            if (in_array($img['item_url'], $image)) { 
+                                if (isset($d_img_roll)) {
+                                    $roll = $img['image_role'];
                                 } else{
                                     $roll = $image_detail[$key1]['image_role'];
                                 }

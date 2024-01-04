@@ -46,11 +46,11 @@ class Data extends AbstractHelper
     public const PERMANENT_TOKEN = 'bynderconfig/bynder_credential/permanent_token';
     public const LICENCE_TOKEN = 'bynderconfig/bynder_credential/licenses_key';
     public const RADIO_BUTTON = 'byndeimageconfig/bynder_image/selectimage';
+	public const FETCH_CRON = 'cronimageconfig/configurable_cron/fetch_enable';
+	public const AUTO_CRON = 'cronimageconfig/auto_add_bynder/auto_enable';
     public const PRODUCT_SKU_LIMIT = 'cronimageconfig/set_limit_product_sku/product_sku_limt';
     public const API_CALLED = 'https://developer.thedamconsultants.com/';
     public const IFRAME_URL = 'https://trello.thedamconsultants.com/bynder-registration';
-	public const FETCH_CRON = 'cronimageconfig/configurable_cron/fetch_enable';
-	public const AUTO_CRON = 'cronimageconfig/auto_add_bynder/auto_enable';
 
     /**
      * Data Helper
@@ -157,24 +157,6 @@ class Data extends AbstractHelper
     {
         return (string) $this->getStoreConfig(self::LICENCE_TOKEN);
     }
-	/**
-     * Get Fetch cron enable
-     *
-     * @return $this
-     */
-    public function getFetchCronEnable()
-    {
-        return $this->getConfig(self::FETCH_CRON);
-    }
-	/**
-     * Get Auto cron enable
-     *
-     * @return $this
-     */
-    public function getAutoCronEnable()
-    {
-        return $this->getConfig(self::AUTO_CRON);
-    }
     /**
      * Bynde Image Config
      *
@@ -210,6 +192,24 @@ class Data extends AbstractHelper
     public function getIframeUrl()
     {
         return self::IFRAME_URL;
+    }
+	/**
+     * Get Fetch cron enable
+     *
+     * @return $this
+     */
+    public function getFetchCronEnable()
+    {
+        return $this->getConfig(self::FETCH_CRON);
+    }
+	/**
+     * Get Auto cron enable
+     *
+     * @return $this
+     */
+    public function getAutoCronEnable()
+    {
+        return $this->getConfig(self::AUTO_CRON);
     }
     /**
      * Get Permanen Token

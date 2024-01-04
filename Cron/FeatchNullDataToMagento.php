@@ -65,8 +65,10 @@ class FeatchNullDataToMagento
         $product_collection = $this->collectionFactory->create();
         $product_sku_limit = (int)$this->datahelper->getProductSkuLimitConfig();
         if (!empty($product_sku_limit)) {
+			//echo "Not empty ". $product_sku_limit;
             $product_collection->getSelect()->limit($product_sku_limit);
         } else {
+			//echo "empty ". $product_sku_limit;
             $product_collection->getSelect()->limit(50);
         }
         $product_collection->addAttributeToSelect('*')

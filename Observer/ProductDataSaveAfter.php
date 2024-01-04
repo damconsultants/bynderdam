@@ -155,35 +155,67 @@ class ProductDataSaveAfter implements ObserverInterface
             $video = "";
             $flag = 0;
             $type = [];
-            if (isset($image)) {
-                $img_array = json_decode($image, true);
-                foreach ($img_array as $img) {
-                    $type[] = $img['item_type'];
-                }
-                /*  IMAGE & VIDEO == 1
-                IMAGE == 2
-                VIDEO == 3 */
-                if (in_array("IMAGE", $type) && in_array("VIDEO", $type)) {
-                    $flag = 1;
-                } elseif (in_array("IMAGE", $type)) {
-                    $flag = 2;
-                } elseif (in_array("VIDEO", $type)) {
-                    $flag = 3;
-                }
-                $this->productActionObject->updateAttributes([$productId], ['bynder_isMain' => $flag], $storeId);
-                $this->productActionObject->updateAttributes([$productId], ['bynder_multi_img' => $image], $storeId);
-                $where = ["id = ?" => $image_coockie_id];
-                $connection->delete($table_name_image, $where);
-                $publicCookieMetadata = $this->cookieMetadataFactory->createPublicCookieMetadata();
-                $publicCookieMetadata->setDurationOneYear();
-                $publicCookieMetadata->setPath('/');
-                $publicCookieMetadata->setHttpOnly(false);
-                $this->cookieManager->setPublicCookie(
-                    'image_coockie_id',
-                    0,
-                    $publicCookieMetadata
-                );
-            }
+			try {
+				if (!empty($image)) {
+					$img_array = json_decode($image, true);
+					foreach ($img_array as $img) {
+						$type[] = $img['item_type'];
+					}
+					/*  IMAGE & VIDEO == 1
+					IMAGE == 2
+					VIDEO == 3 */
+					if (in_array("IMAGE", $type) && in_array("VIDEO", $type)) {
+						$flag = 1;
+					} elseif (in_array("IMAGE", $type)) {
+						$flag = 2;
+					} elseif (in_array("VIDEO", $type)) {
+						$flag = 3;
+					}
+					$this->productActionObject->updateAttributes([$productId], ['bynder_isMain' => $flag], $storeId);
+					$this->productActionObject->updateAttributes([$productId], ['bynder_multi_img' => $image], $storeId);
+					$where = ["id = ?" => $image_coockie_id];
+					$connection->delete($table_name_image, $where);
+					$publicCookieMetadata = $this->cookieMetadataFactory->createPublicCookieMetadata();
+					$publicCookieMetadata->setDurationOneYear();
+					$publicCookieMetadata->setPath('/');
+					$publicCookieMetadata->setHttpOnly(false);
+					$this->cookieManager->setPublicCookie(
+						'image_coockie_id',
+						0,
+						$publicCookieMetadata
+					);
+				} else {
+					$this->productActionObject->updateAttributes([$productId], ['bynder_isMain' => ""], $storeId);
+					$this->productActionObject->updateAttributes([$productId], ['bynder_multi_img' => $image], $storeId);
+					$this->productActionObject->updateAttributes([$productId], ['bynder_cron_sync' => ""], $storeId);
+					$this->productActionObject->updateAttributes([$productId], ['bynder_auto_replace' => ""], $storeId);
+					$where = ["id = ?" => $image_coockie_id];
+					$connection->delete($table_name_image, $where);
+					$publicCookieMetadata = $this->cookieMetadataFactory->createPublicCookieMetadata();
+					$publicCookieMetadata->setDurationOneYear();
+					$publicCookieMetadata->setPath('/');
+					$publicCookieMetadata->setHttpOnly(false);
+					$this->cookieManager->setPublicCookie(
+						'image_coockie_id',
+						0,
+						$publicCookieMetadata
+					);
+				}
+			} catch (\Exception $e) {
+				$this->productActionObject->updateAttributes([$productId], ['bynder_multi_img' => $bynder_multi_img], $storeId);
+				$where = ["id = ?" => $image_coockie_id];
+				$connection->delete($table_name_image, $where);
+				$publicCookieMetadata = $this->cookieMetadataFactory->createPublicCookieMetadata();
+				$publicCookieMetadata->setDurationOneYear();
+				$publicCookieMetadata->setPath('/');
+				$publicCookieMetadata->setHttpOnly(false);
+				$this->cookieManager->setPublicCookie(
+					'image_coockie_id',
+					0,
+					$publicCookieMetadata
+				);
+			}
+            
         }
     }
 }

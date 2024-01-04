@@ -585,12 +585,11 @@ class AutoAddFromMagento
 					if ($img['item_type'] == 'IMAGE') {
 						$logger->info("Sku => ". $product_sku_key . "key => ". $key1);
 						if (in_array($img['item_url'], $image)) {
-							if (!empty($d_img_roll)) {
-								$roll = [];
-							} else {
+							if (isset($d_img_roll)) {
+								$roll = $img['image_role'];
+                            } else{
 								$roll = $image_detail[$key1]['image_role'];
-								
-							}
+                            }
 							$new_image_detail[] = [
 								"item_url" => $img['item_url'],
 								"alt_text" => $image_detail[$key1]['alt_text'],
