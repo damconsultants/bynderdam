@@ -465,14 +465,15 @@ class Psku extends \Magento\Backend\App\Action
 						
                         if ($img['item_type'] == 'IMAGE') {
                             if (in_array($img['item_url'], $image)) { 
+                                $item_key = array_search($img['item_url'],array_column($image_detail,"item_url"));
                                 if (isset($d_img_roll)) {
                                     $roll = $img['image_role'];
                                 } else{
-                                    $roll = $image_detail[$key1]['image_role'];
+                                    $roll = $image_detail[$item_key]['image_role'];
                                 }
                                 $new_image_detail[] = [
                                     "item_url" => $img['item_url'],
-                                    "alt_text" => $image_detail[$key1]['alt_text'],
+                                    "alt_text" => $image_detail[$item_key]['alt_text'],
                                     "image_role" => $roll,
                                     "item_type" => $img['item_type'],
                                     "thum_url" => $img['thum_url'],
@@ -484,8 +485,8 @@ class Psku extends \Magento\Backend\App\Action
                             if ($total_new_value > 1) {
                                 foreach ($new_image_detail as $nn => $n_img) {
                                     if ($n_img['item_type'] == "IMAGE" && $nn != ($total_new_value - 1)) {
-                                        if ($new_magento_role_option_array[$key1] != "###") {
-                                            $new_mg_role_array = (array)$new_magento_role_option_array[$key1];
+                                        if ($new_magento_role_option_array[$item_key] != "###") {
+                                            $new_mg_role_array = (array)$new_magento_role_option_array[$item_key];
                                             if (count($n_img["image_role"]) > 0 && count($new_mg_role_array) > 0) {
                                                 $result_val=array_diff($n_img["image_role"], $new_mg_role_array);
                                                 $new_image_detail[$nn]["image_role"] = $result_val;

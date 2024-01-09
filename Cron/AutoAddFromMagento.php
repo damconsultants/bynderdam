@@ -561,10 +561,10 @@ class AutoAddFromMagento
                         $d_img_roll = $d_img['image_role'];
                     }
                 }
-				$logger->info("d_img_roll -> ". json_encode($d_img_roll));
+				//$logger->info("d_img_roll -> ". json_encode($d_img_roll));
 				$i_img_roll = "";
 				$image_link = "";
-				$logger->info("image_detail -> ". print_r($image_detail, true));
+				//$logger->info("image_detail -> ". print_r($image_detail, true));
 				if (count($image_detail) > 0) {
 					foreach ($image_detail as $img) {
 						$image[] = $img['item_url'];
@@ -574,8 +574,8 @@ class AutoAddFromMagento
 						}
 					}
 				}
-				$logger->info("i_img_roll -> ". json_encode($i_img_roll));
-				$logger->info("image_link -> ". $image_link);
+				//$logger->info("i_img_roll -> ". json_encode($i_img_roll));
+				//$logger->info("image_link -> ". $image_link);
 				if (count($video_detail) > 0) {
 					foreach ($video_detail as $video) {
 						$video[] = $video['item_url'];
@@ -583,16 +583,16 @@ class AutoAddFromMagento
 				}
 				foreach ($item_old_value as $key1 => $img) {
 					if ($img['item_type'] == 'IMAGE') {
-						$logger->info("Sku => ". $product_sku_key . "key => ". $key1);
 						if (in_array($img['item_url'], $image)) {
+                            $item_key = array_search($img['item_url'],array_column($image_detail,"item_url"));
 							if (isset($d_img_roll)) {
 								$roll = $img['image_role'];
                             } else{
-								$roll = $image_detail[$key1]['image_role'];
+								$roll = $image_detail[$item_key]['image_role'];
                             }
 							$new_image_detail[] = [
 								"item_url" => $img['item_url'],
-								"alt_text" => $image_detail[$key1]['alt_text'],
+								"alt_text" => $image_detail[$item_key]['alt_text'],
 								"image_role" => $roll,
 								"item_type" => $img['item_type'],
 								"thum_url" => $img['thum_url'],
@@ -600,13 +600,13 @@ class AutoAddFromMagento
 								"is_import" => $img['is_import']
 							];
 						}
-						$logger->info("new_image_detail -> ". print_r($new_image_detail, true));
+						//$logger->info("new_image_detail -> ". print_r($new_image_detail, true));
 						$total_new_value = count($new_image_detail);
 						if ($total_new_value > 1) {
 							foreach ($new_image_detail as $nn => $n_img) {
 								if ($n_img['item_type'] == "IMAGE" && $nn != ($total_new_value - 1)) {
-									if ($new_magento_role_option_array[$key1] != "###") {
-										$new_mg_role_array = (array)$new_magento_role_option_array[$key1];
+									if ($new_magento_role_option_array[$item_key] != "###") {
+										$new_mg_role_array = (array)$new_magento_role_option_array[$item_key];
 										if (count($n_img["image_role"]) > 0 && count($new_mg_role_array) > 0) {
 											$result_val=array_diff($n_img["image_role"], $new_mg_role_array);
 											$new_image_detail[$nn]["image_role"] = $result_val;
