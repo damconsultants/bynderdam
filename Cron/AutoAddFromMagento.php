@@ -125,7 +125,7 @@ class AutoAddFromMagento
                             } else {
                                 $insert_data = [
                                     "sku" => $sku,
-                                    "message" => $e->getMessage(),
+                                    "message" => $convert_array['data'],
                                     'media_id' => "",
                                     "data_type" => ""
                                 ];
