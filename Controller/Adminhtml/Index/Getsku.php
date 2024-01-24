@@ -51,7 +51,8 @@ class Getsku extends \Magento\Backend\App\Action
         $attribute = $this->collectionFactory->create();
         $productcollection = $this->collectionFactory->create()
             ->addAttributeToSelect('*')
-            ->addAttributeToFilter('status', \Magento\Catalog\Model\Product\Attribute\Source\Status::STATUS_ENABLED);
+            ->addAttributeToFilter('status', \Magento\Catalog\Model\Product\Attribute\Source\Status::STATUS_ENABLED)
+			->addAttributeToFilter('type_id', ['neq' => "configurable"]); 
         if (count($attribute) > 0) {
             foreach ($attribute as $value) {
                 $id[] = $value['attribute_set_id'];

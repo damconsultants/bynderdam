@@ -11,6 +11,15 @@
 ?>
 
 <?php
+$bynder_image = $block->getProduct()->getBynderMultiImg();
+$type = [];
+if (!empty($bynder_image)) {
+    $json_decode = json_decode($bynder_image, true);
+    foreach( $json_decode as $data_image) {
+        $type[] = $data_image['item_type'];
+		
+    }
+}
 $images = $block->getGalleryImages()->getItems();
 $mainImage = current(array_filter($images, function ($img) use ($block) {
             return $block->isMainImage($img);
@@ -56,27 +65,51 @@ if (!empty($one_img) && $one_img !='0') {
         }
     }
 </script>
-
-
+<style>
+#video-tag {
+    margin: 50px;
+    padding: 100px 0px 152px;
+    height: 450px;
+}
+.video_control {
+    opacity:0.5;
+}
+</style>
 <script>
-
-    require(['jquery'], function ($) {
+   require(['jquery'], function ($) {
         $(document).on('gallery:loaded', function () {
             var $fotorama = jQuery('div.gallery-placeholder > div.fotorama');
             var fotorama = $fotorama.data('fotorama');
-            $fotorama.on('fotorama:load', function fotorama_onLoad(e, fotorama, extra) {
-                if (extra.frame.type === 'iframe') {
-                    extra.frame.$stageFrame.html(
-                        '<iframe align="middle" type="text/html"'+
-                        'width="100%" height="100%" src="' + extra.frame.src + '"'+
-                        'frameborder="0" scrolling="no"'+
-                        'allowfullscreen webkitallowfullscreen mozallowfullscreen oallowfullscreen msallowfullscreen>'+
-                        '</iframe>'
-                        );
+            var data_array = '<?php echo json_encode($type); ?>';
+            var parsedTest = JSON.parse(data_array);
+            if($.inArray("VIDEO", parsedTest) >= 0 ) {
+                    $fotorama.on('fotorama:load', function fotorama_onLoad(e, fotorama, extra) {
+                        if (extra.frame.type === 'iframe') {
+                            extra.frame.$stageFrame.html(
+                                '<div class="fotorama-video-container video-unplayed video_control">'+
+                                '<video id="video-tag"  width="75%"><source src="' + extra.frame.src + '" type="video/mp4"></video></div>'
+                                );
+                        }
+                    });
+                    var fotorama = $('.fotorama').fotorama({allowfullscreen: false}).data('fotorama');
+                    fotorama.requestFullScreen();
+                    var $fotoramaDiv = $('.fotorama').fotorama();
+                    $fotoramaDiv.data('fotorama').show(0);
+                    $(".fotorama__arr.fotorama__arr--next, .fotorama__arr.fotorama__arr--prev, .fotorama__nav__shaft").click(function(){
+                        jQuery(".fotorama__active #video-tag").get(0).pause();
+                        jQuery(".fotorama__active #video-tag").get(0).currentTime = 0;
+                        jQuery('.fotorama__active .video_control').addClass("fotorama-video-container");
+                        jQuery('.fotorama__active .video_control').css("opacity","0.5");
+                        jQuery('.fotorama__active #video-tag').attr('controls',false);
+
+                    });
+                    $(document).on("click",".video_control",function(){
+                        jQuery('.fotorama__active .video_control').removeClass("fotorama-video-container");
+                        jQuery('.fotorama__active .video_control').css("opacity","1");
+                        $('.fotorama__active #video-tag').attr('controls',true);
+                        jQuery(".fotorama__active #video-tag").get(0).play();
+                    });
                 }
             });
         });
-
-    });
-
 </script>

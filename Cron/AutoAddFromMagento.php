@@ -86,6 +86,7 @@ class AutoAddFromMagento
                     ['attribute' => 'bynder_auto_replace', 'null' => true]
                 ]
             )
+			->addAttributeToFilter('type_id', ['neq' => "configurable"])
             ->load();
         $property_id = null;
         $collection = $this->metaPropertyCollectionFactory->create()->getData();
@@ -337,7 +338,7 @@ class AutoAddFromMagento
                     array_push($data_val_arr, $data_p);
                 } else {
                     if ($data_value['type'] == 'video') {
-                        $video_link = $image_data["image_link"] . '@@' . $image_data["webimage"];
+                        $video_link = $data_value["original"] . '@@' . $image_data["webimage"];
                         array_push($data_arr, $data_sku[0]);
                         $data_p = [
                             "sku" => $data_sku[0],
@@ -524,7 +525,7 @@ class AutoAddFromMagento
                                 }
                             }
                         } else {
-                            $item_url = explode("?", $new_image_value);
+                            $item_url = explode("@@", $new_image_value);
                             $thum_url = explode("@@", $new_image_value);
                             $media_video_explode = explode("/", $item_url[0]);
                             $logger->info("video_detail => ". $item_url[0]);

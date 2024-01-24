@@ -82,6 +82,7 @@ class FeatchNullDataToMagento
                     ['attribute' => 'bynder_cron_sync', 'null' => true]
                 ]
             )
+			->addAttributeToFilter('type_id', ['neq' => "configurable"])
             ->load();
         $property_id = null;
         $collection = $this->metaPropertyCollectionFactory->create()->getData();
@@ -311,7 +312,7 @@ class FeatchNullDataToMagento
                     array_push($data_val_arr, $data_p);
                 } else {
                     if ($data_value['type'] == 'video') {
-                        $video_link = $image_data["image_link"] . '@@' . $image_data["webimage"];
+                        $video_link = $data_value["original"] . '@@' . $image_data["webimage"];
                         array_push($data_arr, $data_sku[0]);
                         $data_p = [
                             "sku" => $data_sku[0],
@@ -431,7 +432,7 @@ class FeatchNullDataToMagento
                             ];
                             $this->getInsertDataTable($data_image_data);
                         } else {
-                            $item_url = explode("?", $image_value);
+                            $item_url = explode("@@", $image_value);
                             $thum_url = explode("@@", $image_value);
                             $media_video_explode = explode("/", $item_url[0]);
         

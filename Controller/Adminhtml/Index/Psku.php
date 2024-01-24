@@ -101,6 +101,18 @@ class Psku extends \Magento\Backend\App\Action
                                         "lable" => "0"
                                     ];
                                     $this->getInsertDataTable($insert_data);
+									$product_id = $this->product->getIdBySku($sku);
+									$updated_values = [
+										'bynder_multi_img' => null,
+										'bynder_isMain' => null
+									];
+									$storeId = $this->storeManagerInterface->getStore()->getId();
+									$this->productAction->updateAttributes(
+										[$product_id],
+										$updated_values,
+										$storeId
+									);
+									
                                 }
                             } else {
                                 $insert_data = [
@@ -280,7 +292,8 @@ class Psku extends \Magento\Backend\App\Action
                         array_push($data_val_arr, $data_p);
                     } else {
                         if ($data_value['type'] == 'video') {
-                            $video_link = $image_data["image_link"] . '@@' . $image_data["webimage"];
+                            /*$video_link = $image_data["image_link"] . '@@' . $image_data["webimage"];*/
+							$video_link = $data_value["original"] . '@@' . $image_data["webimage"];
                             array_push($data_arr, $data_sku[0]);
                             $data_p = [
                                 "sku" => $data_sku[0],
@@ -627,7 +640,7 @@ class Psku extends \Magento\Backend\App\Action
                         }
                     }
                     foreach ($new_video_array as $vv => $video_value) {
-                        $item_url = explode("?", $video_value);
+                        $item_url = explode("@@", $video_value);
                         $thum_url = explode("@@", $video_value);
                         $media_video_explode = explode("/", $item_url[0]);
                         $find_video = strpos($video_value, "@@");
