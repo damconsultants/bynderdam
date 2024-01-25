@@ -99,7 +99,7 @@ class AutoAddFromMagento
         foreach ($product_collection->getData() as $product) {
             $productSku_array[] = $product['sku'];
         }
-        $logger->info("Sku => ". json_encode($productSku_array, true));
+        //$logger->info("Sku => ". json_encode($productSku_array, true));
         if (count($productSku_array) > 0) {
             foreach ($productSku_array as $sku) {
                 if ($sku != "") {
@@ -587,9 +587,9 @@ class AutoAddFromMagento
 						if (in_array($img['item_url'], $image)) {
                             $item_key = array_search($img['item_url'],array_column($image_detail,"item_url"));
 							if (isset($d_img_roll)) {
-								$roll = $img['image_role'];
-                            } else{
 								$roll = $image_detail[$item_key]['image_role'];
+                            } else{
+								$roll = $img['image_role'];
                             }
 							$new_image_detail[] = [
 								"item_url" => $img['item_url'],

@@ -23,7 +23,6 @@
         $('#bt_id_2').click(function() {
             var product_sku = $('textarea#byndersyncdata_bynder_sync_data_sku').val();
             var select_attribute = $('select#byndersyncdata_bynder_sync_data_select').val();
-            console.log(select_attribute);
             if(checkbox_checked == 0){
                 sku_limit = $('#byndersyncdata_bynder_sync_data_sku_limit').val();
             }else{
@@ -50,7 +49,6 @@
                     var resultText = '';
                     if (response.status == 1) {
                         resultText = response.message
-                        console.log(response.message);
                         $('#byndersyncdata_bynder_sync_data_sku').val(resultText);
                         $(".success-msg-sync").show();
                         $(".error-msg-sync").hide();

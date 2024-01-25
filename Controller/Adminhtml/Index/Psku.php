@@ -480,9 +480,9 @@ class Psku extends \Magento\Backend\App\Action
                             if (in_array($img['item_url'], $image)) { 
                                 $item_key = array_search($img['item_url'],array_column($image_detail,"item_url"));
                                 if (isset($d_img_roll)) {
-                                    $roll = $img['image_role'];
+									$roll = $image_detail[$item_key]['image_role'];   
                                 } else{
-                                    $roll = $image_detail[$item_key]['image_role'];
+                                    $roll = $img['image_role'];
                                 }
                                 $new_image_detail[] = [
                                     "item_url" => $img['item_url'],
