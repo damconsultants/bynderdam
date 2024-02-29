@@ -68,7 +68,7 @@ class AutoAddFromMagento
 		}
         $product_collection = $this->collectionFactory->create();
 
-        $product_sku_limit = (int)$this->datahelper->getProductSkuLimitConfig();
+        $product_sku_limit = (int)$this->datahelper->getAutoProductSkuLimitConfig();
         if (!empty($product_sku_limit)) {
             $product_collection->getSelect()->limit($product_sku_limit);
         } else {
@@ -601,7 +601,7 @@ class AutoAddFromMagento
 								"is_import" => $img['is_import']
 							];
 						}
-						//$logger->info("new_image_detail -> ". print_r($new_image_detail, true));
+						$logger->info("new_image_detail -> ". print_r($new_image_detail, true));
 						$total_new_value = count($new_image_detail);
 						if ($total_new_value > 1) {
 							foreach ($new_image_detail as $nn => $n_img) {

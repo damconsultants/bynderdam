@@ -63,7 +63,7 @@ class FeatchNullDataToMagento
 			return false;
 		}
         $product_collection = $this->collectionFactory->create();
-        $product_sku_limit = (int)$this->datahelper->getProductSkuLimitConfig();
+        $product_sku_limit = (int)$this->datahelper->getFetchProductSkuLimitConfig();
         if (!empty($product_sku_limit)) {
 			//echo "Not empty ". $product_sku_limit;
             $product_collection->getSelect()->limit($product_sku_limit);

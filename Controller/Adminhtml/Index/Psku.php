@@ -691,7 +691,7 @@ class Psku extends \Magento\Backend\App\Action
                     foreach ($new_video_array as $vv => $video_value) {
                         $find_video = strpos($video_value, "@@");
                         if($find_video) {
-                            $item_url = explode("?", $video_value);
+                            $item_url = explode("@@", $video_value);
                             $thum_url = explode("@@", $video_value);
                             $media_video_explode = explode("/", $item_url[0]);
                             $video_detail[] = [

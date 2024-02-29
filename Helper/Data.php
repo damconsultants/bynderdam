@@ -48,6 +48,8 @@ class Data extends AbstractHelper
     public const RADIO_BUTTON = 'byndeimageconfig/bynder_image/selectimage';
 	public const FETCH_CRON = 'cronimageconfig/configurable_cron/fetch_enable';
 	public const AUTO_CRON = 'cronimageconfig/auto_add_bynder/auto_enable';
+	public const FETCH_PRODUCT_SKU_LIMIT = 'cronimageconfig/configurable_cron/fetch_product_sku_limt';
+	public const AUTO_PRODUCT_SKU_LIMIT = 'cronimageconfig/auto_add_bynder/auto_product_sku_limt';
     public const PRODUCT_SKU_LIMIT = 'cronimageconfig/set_limit_product_sku/product_sku_limt';
     public const API_CALLED = 'https://developer.thedamconsultants.com/';
     public const IFRAME_URL = 'https://trello.thedamconsultants.com/bynder-registration';
@@ -171,9 +173,27 @@ class Data extends AbstractHelper
      *
      * @return $this
      */
-    public function getProductSkuLimitConfig()
+    /*public function getProductSkuLimitConfig()
     {
         return (string) $this->getStoreConfig(self::PRODUCT_SKU_LIMIT);
+    }*/
+	/**
+     * Get Product Sku Limit Config
+     *
+     * @return $this
+     */
+    public function getAutoProductSkuLimitConfig()
+    {
+        return (string) $this->getStoreConfig(self::AUTO_PRODUCT_SKU_LIMIT);
+    }
+	/**
+     * Get Product Sku Limit Config
+     *
+     * @return $this
+     */
+    public function getFetchProductSkuLimitConfig()
+    {
+        return (string) $this->getStoreConfig(self::FETCH_PRODUCT_SKU_LIMIT);
     }
     /**
      * Get Bynder Dom

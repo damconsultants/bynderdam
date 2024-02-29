@@ -810,53 +810,56 @@ $get_base_url = $block->getBaseUrl();
                             }
                             */
 
+							if(v.item_type == 'IMAGE') {
+								let match_index = past_item_array.indexOf(origi_url);
+								console.log(match_index);
+								var check_old_item_role = past_item_role_array[match_index];
+								console.log(check_old_item_role);
+								var count_old_array_role = check_old_item_role.length;
 
-                            let match_index = past_item_array.indexOf(origi_url);
-                            var check_old_item_role = past_item_role_array[match_index];
-                            var count_old_array_role = check_old_item_role.length;
+								var count_new_array_role = new_item_roles.length;
 
-                            var count_new_array_role = new_item_roles.length;
-
-                            var old_item_role = "original";
-                            if(count_old_array_role > 0){
-                                old_item_role = check_old_item_role[0];
-                            }
-                            
-                            if(count_old_array_role == count_new_array_role){
-                                if(check_old_item_role[0] == new_item_roles[0]){
-                                   /* do nothing */
-                                }else{
-                                    var new_changes = {
-                                        "role" : new_item_roles[0],
-                                        "image_url" : imag_url_val,
-                                        "item_key" : img_media_id,
-                                        "old_role_name": old_item_role,
-                                        "type"  : 1
-                                    }
-                                    new_final_array[k] = new_changes;
-                                }
-                            }else{
-                                if(count_new_array_role > 0){
-                                    var new_changes = {
-                                        "role" : new_item_roles[0],
-                                        "image_url" : imag_url_val,
-                                        "item_key" : img_media_id,
-                                        "old_role_name": old_item_role,
-                                        "type"  : 2
-                                    }
-                                    new_final_array[k] = new_changes;
-                                }else{
-                                    var new_changes = {
-                                        "role" : "original",
-                                        "image_url" : imag_url_val,
-                                        "item_key" : img_media_id,
-                                        "old_role_name": old_item_role,
-                                        "type"  : 3
-                                    }
-                                   new_final_array[k] = new_changes;
-                                }
-                            }
-                        }
+								var old_item_role = "original";
+								if(count_old_array_role > 0){
+									old_item_role = check_old_item_role[0];
+								}
+								
+								if(count_old_array_role == count_new_array_role){
+									if(check_old_item_role[0] == new_item_roles[0]){
+									   /* do nothing */
+									}else{
+										var new_changes = {
+											"role" : new_item_roles[0],
+											"image_url" : imag_url_val,
+											"item_key" : img_media_id,
+											"old_role_name": old_item_role,
+											"type"  : 1
+										}
+										new_final_array[k] = new_changes;
+									}
+								}else{
+									if(count_new_array_role > 0){
+										var new_changes = {
+											"role" : new_item_roles[0],
+											"image_url" : imag_url_val,
+											"item_key" : img_media_id,
+											"old_role_name": old_item_role,
+											"type"  : 2
+										}
+										new_final_array[k] = new_changes;
+									}else{
+										var new_changes = {
+											"role" : "original",
+											"image_url" : imag_url_val,
+											"item_key" : img_media_id,
+											"old_role_name": old_item_role,
+											"type"  : 3
+										}
+									   new_final_array[k] = new_changes;
+									}
+								}
+							}
+                        } 
                     });
                     if(new_final_array.length > 0){
                         var new_value_obj = JSON.stringify(new_final_array);
