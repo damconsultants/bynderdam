@@ -11,32 +11,50 @@ class Data extends AbstractHelper
      * @var $storeScope
      */
     protected $storeScope;
-
     /**
      * @var $productrepository
      */
     protected $productrepository;
-
     /**
      * @var \Magento\Framework\Filesystem
      */
     protected $filesystem;
-
     /**
      * @var \Magento\Framework\App\Config\ScopeConfigInterface
      */
     protected $_scopeConfig;
-
+    /**
+     * @var $_curl
+     */
+    protected $_curl;
     /**
      * @var $by_redirecturl
      */
     public $by_redirecturl;
-
     /**
      * @var $bynderDomain
      */
     public $bynderDomain = "";
-
+    /**
+     * @var $cookieMetadataFactory
+     */
+    protected $cookieMetadataFactory;
+    /**
+     * @var $cookieManager
+     */
+    protected $cookieManager;
+    /**
+     * @var $_storeManager
+     */
+    protected $_storeManager;
+    /**
+     * @var $_bulk
+     */
+    protected $_bulk;
+    /**
+     * @var $_registry
+     */
+    protected $_registry;
     /**
      * @var $permanent_token
      */
@@ -46,10 +64,11 @@ class Data extends AbstractHelper
     public const PERMANENT_TOKEN = 'bynderconfig/bynder_credential/permanent_token';
     public const LICENCE_TOKEN = 'bynderconfig/bynder_credential/licenses_key';
     public const RADIO_BUTTON = 'byndeimageconfig/bynder_image/selectimage';
-	public const FETCH_CRON = 'cronimageconfig/configurable_cron/fetch_enable';
-	public const AUTO_CRON = 'cronimageconfig/auto_add_bynder/auto_enable';
-	public const FETCH_PRODUCT_SKU_LIMIT = 'cronimageconfig/configurable_cron/fetch_product_sku_limt';
-	public const AUTO_PRODUCT_SKU_LIMIT = 'cronimageconfig/auto_add_bynder/auto_product_sku_limt';
+    public const FETCH_CRON = 'cronimageconfig/configurable_cron/fetch_enable';
+    public const AUTO_CRON = 'cronimageconfig/auto_add_bynder/auto_enable';
+    public const DELETE_CRON = 'cronimageconfig/delete_cron_bynder/delete_enable';
+    public const FETCH_PRODUCT_SKU_LIMIT = 'cronimageconfig/configurable_cron/fetch_product_sku_limt';
+    public const AUTO_PRODUCT_SKU_LIMIT = 'cronimageconfig/auto_add_bynder/auto_product_sku_limt';
     public const PRODUCT_SKU_LIMIT = 'cronimageconfig/set_limit_product_sku/product_sku_limt';
     public const API_CALLED = 'https://developer.thedamconsultants.com/';
     public const IFRAME_URL = 'https://trello.thedamconsultants.com/bynder-registration';
@@ -151,6 +170,16 @@ class Data extends AbstractHelper
         return (string) $this->getStoreConfig(self::PERMANENT_TOKEN);
     }
     /**
+     * Get Permanent Token
+     *
+     * @param string $path
+     * @return $this
+     */
+    public function getDeleteCron($path)
+    {
+        return (string) $this->getStoreConfig($path);
+    }
+    /**
      * Get Licence Token
      *
      * @return $this
@@ -177,7 +206,7 @@ class Data extends AbstractHelper
     {
         return (string) $this->getStoreConfig(self::PRODUCT_SKU_LIMIT);
     }*/
-	/**
+    /**
      * Get Product Sku Limit Config
      *
      * @return $this
@@ -186,7 +215,7 @@ class Data extends AbstractHelper
     {
         return (string) $this->getStoreConfig(self::AUTO_PRODUCT_SKU_LIMIT);
     }
-	/**
+    /**
      * Get Product Sku Limit Config
      *
      * @return $this
@@ -213,7 +242,7 @@ class Data extends AbstractHelper
     {
         return self::IFRAME_URL;
     }
-	/**
+    /**
      * Get Fetch cron enable
      *
      * @return $this
@@ -222,7 +251,7 @@ class Data extends AbstractHelper
     {
         return $this->getConfig(self::FETCH_CRON);
     }
-	/**
+    /**
      * Get Auto cron enable
      *
      * @return $this
@@ -230,6 +259,15 @@ class Data extends AbstractHelper
     public function getAutoCronEnable()
     {
         return $this->getConfig(self::AUTO_CRON);
+    }
+    /**
+     * Get Auto cron enable
+     *
+     * @return $this
+     */
+    public function getDeleteCronEnable()
+    {
+        return $this->getConfig(self::DELETE_CRON);
     }
     /**
      * Get Permanen Token
@@ -824,5 +862,43 @@ class Data extends AbstractHelper
 
         $response = $this->_curl->getBody();
         return $response;
+    }
+    /**
+     * Remove Role DAM
+     *
+     * @param array $bynder_auth
+     * @return $this
+     */
+    public function getCheckBynderSideDeleteData($bynder_auth)
+    {
+        $getBaseUrl = $this->_storeManager->getStore()->getBaseUrl();
+        $fields = [
+            'domain_name' => $this->_storeManager->getStore()->getBaseUrl(),
+            'bynder_domain' => $this->getBynderDom(),
+            'permanent_token' => $this->getPermanenToken(),
+            'licence_token' => $this->getLicenceToken(),
+            'base_url' => $getBaseUrl,
+            'last_cron_time' => $bynder_auth['last_cron_time']
+        ];
+        $jsonData = '{}';
+        $fields = json_encode($fields);
+        $this->_curl->setOption(CURLOPT_URL, self::API_CALLED . 'bynderdam-remove-assets-deleted-data-from-dam');
+        $this->_curl->setOption(CURLOPT_RETURNTRANSFER, true);
+        $this->_curl->setOption(CURLOPT_TIMEOUT, 0);
+        $this->_curl->setOption(CURLOPT_ENCODING, '');
+        $this->_curl->setOption(CURLOPT_MAXREDIRS, 10);
+        $this->_curl->setOption(CURLOPT_FOLLOWLOCATION, true);
+        $this->_curl->setOption(CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+        $this->_curl->setOption(CURLOPT_POSTFIELDS, $fields);
+
+        $this->_curl->addHeader("Content-Type", "application/json");
+
+        $this->_curl->post(self::API_CALLED . 'bynderdam-remove-assets-deleted-data-from-dam', $jsonData);
+
+        $response = $this->_curl->getBody();
+        return $response;
+        /*
+        $response = '{"status":1,"data":[{"id":"90261277-77FC-4DEB-8C5021715E9A1D38"},{"id":"D88487A1-C6E9-4202-B362AEEA91CDB0D1"}]}';
+        return $response;*/
     }
 }

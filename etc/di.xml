@@ -6,6 +6,7 @@
                 <item name="bynder_index_listing_data_source" xsi:type="string">DamConsultants\BynderDAM\Model\ResourceModel\Collection\Grid\Collection</item>
                 <item name="bynder_index_sync_data_source" xsi:type="string">DamConsultants\BynderDAM\Model\ResourceModel\Collection\Grid\BynderConfigSyncDataCollection</item>
                 <item name="bynder_index_replace_data_source" xsi:type="string">DamConsultants\BynderDAM\Model\ResourceModel\Collection\Grid\BynderConfigSyncDataCollection</item>
+				<item name="bynder_index_delete_data_source" xsi:type="string">DamConsultants\BynderDAM\Model\ResourceModel\Collection\Grid\BynderDeleteDataCollection</item>
             </argument>
         </arguments>
     </type>
@@ -25,6 +26,12 @@
         <arguments>
             <argument name="mainTable" xsi:type="string">bynder_cron_replace_data</argument>
             <argument name="resourceModel" xsi:type="string">DamConsultants\BynderDAM\Model\ResourceModel\BynderAutoReplaceData</argument>
+        </arguments>
+    </virtualType>
+	<virtualType name="DamConsultants\BynderDAM\Model\ResourceModel\Collection\Grid\BynderDeleteDataCollection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">bynder_delete_data</argument>
+            <argument name="resourceModel" xsi:type="string">DamConsultants\BynderDAM\Model\ResourceModel\BynderDeleteData</argument>
         </arguments>
     </virtualType>
 </config>

@@ -6,7 +6,10 @@ use DamConsultants\BynderDAM\Model\ResourceModel\Collection\BynderSycDataCollect
 
 class ProductDataProvider extends \Magento\Ui\DataProvider\AbstractDataProvider
 {
-
+    /**
+     * @var $collection
+     */
+    protected $collection;
     /**
      * @param BynderSycDataCollectionFactory $BynderSycDataCollectionFactory
      * @param string $name

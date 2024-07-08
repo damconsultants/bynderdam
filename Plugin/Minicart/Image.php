@@ -4,7 +4,14 @@ namespace DamConsultants\BynderDAM\Plugin\Minicart;
 
 class Image
 {
-
+    /**
+     * @var $_registry
+     */
+    protected $_registry;
+    /**
+     * @var $_registry
+     */
+    protected $product;
     /**
      * Image
      * @param \Magento\Framework\Registry $Registry

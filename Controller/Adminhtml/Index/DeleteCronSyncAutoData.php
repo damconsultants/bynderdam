@@ -6,7 +6,11 @@ use Magento\Backend\App\Action\Context;
 
 class DeleteCronSyncAutoData extends Action
 {
-    public $BynderConfigSyncDataFactory;
+    /**
+     * @var bynderSycDataFactory.
+     *
+     */
+    public $bynderSycDataFactory;
     /**
      * Closed constructor.
      *
@@ -37,7 +41,9 @@ class DeleteCronSyncAutoData extends Action
         }
         return $resultRedirect->setPath('bynder/index/replacecrongrid');
     }
-
+    /**
+     * Execute
+     */
     public function _isAllowed()
     {
         return $this->_authorization->isAllowed('DamConsultants_BynderDAM::delete');

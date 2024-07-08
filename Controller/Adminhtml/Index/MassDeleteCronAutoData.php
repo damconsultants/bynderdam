@@ -9,10 +9,28 @@ use DamConsultants\BynderDAM\Model\ResourceModel\Collection\BynderAutoReplaceDat
 
 class MassDeleteCronAutoData extends Action
 {
+    /**
+     * @var collectionFactory.
+     *
+     */
     public $collectionFactory;
-
+    /**
+     * @var filter.
+     *
+     */
     public $filter;
-
+    /**
+     * @var bynderFactory.
+     *
+     */
+    protected $bynderFactory;
+    /**
+     * Get Sku.
+     * @param Context $context
+     * @param Filter $filter
+     * @param BynderAutoReplaceDataCollectionFactory $collectionFactory
+     * @param \DamConsultants\BynderDAM\Model\BynderAutoReplaceDataFactory $bynderFactory
+     */
     public function __construct(
         Context $context,
         Filter $filter,
@@ -24,7 +42,11 @@ class MassDeleteCronAutoData extends Action
         $this->bynderFactory = $bynderFactory;
         parent::__construct($context);
     }
-
+    /**
+     * Execute
+     *
+     * @return $this
+     */
     public function execute()
     {
         try {
@@ -42,7 +64,11 @@ class MassDeleteCronAutoData extends Action
         }
         return $this->resultFactory->create(ResultFactory::TYPE_REDIRECT)->setPath('bynder/index/replacecrongrid');
     }
-
+    /**
+     * Execute
+     *
+     * @return $this
+     */
     public function _isAllowed()
     {
         return $this->_authorization->isAllowed('DamConsultants_BynderDAM::delete');

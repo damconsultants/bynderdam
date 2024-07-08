@@ -7,7 +7,7 @@ use Magento\Backend\Block\Template\Context;
 use Magento\Framework\Data\Form\Element\AbstractElement;
 use \Magento\Store\Model\StoreManagerInterface;
 
-class AutoReplaceDataProduct extends Field
+class DeleteDataProduct extends Field
 {
     /**
      * Block template.
@@ -15,6 +15,18 @@ class AutoReplaceDataProduct extends Field
      * @var string
      */
     protected $_template = 'DamConsultants_BynderDAM::system/config/comment.phtml';
+    /**
+     * Block template.
+     *
+     * @var string
+     */
+    protected $_storeManager;
+    /**
+     * Block template.
+     *
+     * @var string
+     */
+    protected $HelperBackend;
 
     /**
      * Button
@@ -74,9 +86,9 @@ class AutoReplaceDataProduct extends Field
         $activeButton = $this->getLayout()
         ->createBlock(\Magento\Backend\Block\Widget\Button::class)
         ->setData([
-            'id'      => 'auto_replace_bynder_info',
+            'id'      => 'delete_bynder_info',
             'label'   => __("You don't know How to work this so Please Click Here..."),
-            'onclick' => 'javascript:AutoReplaceDataProduct(); return false;',
+            'onclick' => 'javascript:DeleteDataProduct(); return false;',
         ]);
         return $activeButton->toHtml();
     }

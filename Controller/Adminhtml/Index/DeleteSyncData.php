@@ -9,7 +9,7 @@ class DeleteSyncData extends Action
     /**
      * @var $BynderConfigSyncDataFactory
      */
-    public $BynderConfigSyncDataFactory;
+    public $bynderConfigSyncDataFactory;
     /**
      * Closed constructor.
      *

@@ -18,6 +18,26 @@ class MassResyncData extends Action
      */
     public $filter;
     /**
+     * @var $bynderFactory
+     */
+    protected $bynderFactory;
+    /**
+     * @var $_productRepository
+     */
+    protected $_productRepository;
+    /**
+     * @var $action
+     */
+    protected $action;
+    /**
+     * @var $searchCriteriaBuilder
+     */
+    protected $searchCriteriaBuilder;
+    /**
+     * @var $storeManagerInterface
+     */
+    protected $storeManagerInterface;
+    /**
      * Closed constructor.
      *
      * @param Context $context
@@ -26,6 +46,7 @@ class MassResyncData extends Action
      * @param \DamConsultants\BynderDAM\Model\BynderSycDataFactory $bynderFactory
      * @param \Magento\Catalog\Model\ProductRepository $productRepository
      * @param \Magento\Catalog\Model\Product\Action $action
+     * @param \Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder
      * @param \Magento\Store\Model\StoreManagerInterface $storeManagerInterface
      */
     public function __construct(
@@ -35,7 +56,7 @@ class MassResyncData extends Action
         \DamConsultants\BynderDAM\Model\BynderSycDataFactory $bynderFactory,
         \Magento\Catalog\Model\ProductRepository $productRepository,
         \Magento\Catalog\Model\Product\Action $action,
-		\Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder,
+        \Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder,
         \Magento\Store\Model\StoreManagerInterface $storeManagerInterface
     ) {
         $this->filter = $filter;
@@ -43,13 +64,12 @@ class MassResyncData extends Action
         $this->bynderFactory = $bynderFactory;
         $this->_productRepository = $productRepository;
         $this->action = $action;
-		$this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->storeManagerInterface = $storeManagerInterface;
         parent::__construct($context);
     }
     /**
      * Execute
-     *
      */
     public function execute()
     {
@@ -60,33 +80,33 @@ class MassResyncData extends Action
             $not_exist_skus = "";
             $product_ids = [];
             foreach ($collection as $model) {
-				$searchCriteria = $this->searchCriteriaBuilder->addFilter("sku", $model->getSku(), 'eq')->create();
-				$products = $this->_productRepository->getList($searchCriteria);
-				$items = $products->getItems();
-				if (count($items) != 0 ) {
-					if ($model->getLable() == 0) {
-						$_product = $this->_productRepository->get($model->getSku());
-						$product_ids[] = $_product->getId();
-						$model = $this->bynderFactory->create()->load($model->getId());
-						$model->setLable('2');
-						$model->save();
-						$count++;
-					}
-				} else {
-                    if($not_exist_skus == ""){
+                $searchCriteria = $this->searchCriteriaBuilder->addFilter("sku", $model->getSku(), 'eq')->create();
+                $products = $this->_productRepository->getList($searchCriteria);
+                $items = $products->getItems();
+                if (count($items) != 0) {
+                    if ($model->getLable() == 0) {
+                        $_product = $this->_productRepository->get($model->getSku());
+                        $product_ids[] = $_product->getId();
+                        $model = $this->bynderFactory->create()->load($model->getId());
+                        $model->setLable('2');
+                        $model->save();
+                        $count++;
+                    }
+                } else {
+                    if ($not_exist_skus == "") {
                         $not_exist_skus = $model->getSku();
-                    }else{
+                    } else {
                         $not_exist_skus .= ",".$model->getSku();
                     }
-				}
+                }
             }
-            if($not_exist_skus != ""){
+            if ($not_exist_skus != "") {
                 $this->messageManager->addSuccessMessage(__('This SKU ('. $not_exist_skus .') not available in Products list.'));
-            } 
+            }
             $updated_values = [
                 'bynder_cron_sync' => null
             ];
-            if(count($product_ids) > 0){
+            if (count($product_ids) > 0) {
                 $this->action->updateAttributes(
                     $product_ids,
                     $updated_values,

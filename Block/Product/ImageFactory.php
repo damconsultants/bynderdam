@@ -48,6 +48,10 @@ class ImageFactory extends \Magento\Catalog\Block\Product\ImageFactory
      * @var PlaceholderFactory
      */
     private $viewAssetPlaceholderFactory;
+    /**
+     * @var PlaceholderFactory
+     */
+    protected $productRepository;
 
     /**
      * @param ObjectManagerInterface $objectManager

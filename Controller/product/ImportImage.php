@@ -4,9 +4,45 @@ namespace DamConsultants\BynderDAM\Controller\Product;
 class ImportImage extends \Magento\Framework\App\Action\Action
 {
     /**
-     * @var string $_pageFactory;
+     * @var $_pageFactory
      */
     protected $_pageFactory;
+    /**
+     * @var $_product
+     */
+    protected $_product;
+    /**
+     * @var $file
+     */
+    protected $file;
+    /**
+     * @var $resultJsonFactory
+     */
+    protected $resultJsonFactory;
+    /**
+     * @var $driverFile
+     */
+    protected $driverFile;
+    /**
+     * @var $storeManagerInterface
+     */
+    protected $storeManagerInterface;
+    /**
+     * @var $cookieManager
+     */
+    protected $cookieManager;
+    /**
+     * @var $productActionObject
+     */
+    protected $productActionObject;
+    /**
+     * @var $_registry
+     */
+    protected $_registry;
+    /**
+     * @var $logger
+     */
+    protected $logger;
     /**
      * Import Image.
      *
@@ -92,17 +128,17 @@ class ImportImage extends \Magento\Framework\App\Action\Action
                             $file_name = str_replace("%20", " ", $file_name);
                             $img_url = $img_dir . $file_name;
                             $roll = [];
-                            if (in_array('Base', $item['image_role'])){
-                                array_push($roll,"image");
+                            if (in_array('Base', $item['image_role'])) {
+                                array_push($roll, "image");
                             }
-                            if (in_array('Small', $item['image_role'])){
-                                array_push($roll,"small_image");
+                            if (in_array('Small', $item['image_role'])) {
+                                array_push($roll, "small_image");
                             }
-                            if (in_array('Thumbnail', $item['image_role'])){
-                                array_push($roll,"thumbnail");
+                            if (in_array('Thumbnail', $item['image_role'])) {
+                                array_push($roll, "thumbnail");
                             }
-                            if (in_array('Swatch', $item['image_role'])){
-                                array_push($roll,"swatch_image");
+                            if (in_array('Swatch', $item['image_role'])) {
+                                array_push($roll, "swatch_image");
                             }
                             $this->file->write(
                                 $img_url,

@@ -148,7 +148,7 @@ $get_base_url = $block->getBaseUrl();
     var drag_img = "<?= $block->escapeHtml($block->getDrag()); ?>";
     var delete_icon = "<?= $block->escapeHtml($block->getDelete()); ?>";
     var attr = <?= /* @noEscape */ $block->getJson($attr); ?>;
-    var all_mg_roles = <?= json_encode($all_magento_roles) ?>;
+    var all_mg_roles = <?= /* @noEscape */ $block->getJson($all_magento_roles) ?>;
     var img_details_old = []; 
     var past_bynder_image_videos=[];
     var past_item_array = [];
@@ -810,55 +810,50 @@ $get_base_url = $block->getBaseUrl();
                             }
                             */
 
-							if(v.item_type == 'IMAGE') {
-								let match_index = past_item_array.indexOf(origi_url);
-								console.log(match_index);
-								var check_old_item_role = past_item_role_array[match_index];
-								console.log(check_old_item_role);
-								var count_old_array_role = check_old_item_role.length;
-
-								var count_new_array_role = new_item_roles.length;
-
-								var old_item_role = "original";
-								if(count_old_array_role > 0){
-									old_item_role = check_old_item_role[0];
-								}
-								
-								if(count_old_array_role == count_new_array_role){
-									if(check_old_item_role[0] == new_item_roles[0]){
-									   /* do nothing */
-									}else{
-										var new_changes = {
-											"role" : new_item_roles[0],
-											"image_url" : imag_url_val,
-											"item_key" : img_media_id,
-											"old_role_name": old_item_role,
-											"type"  : 1
-										}
-										new_final_array[k] = new_changes;
-									}
-								}else{
-									if(count_new_array_role > 0){
-										var new_changes = {
-											"role" : new_item_roles[0],
-											"image_url" : imag_url_val,
-											"item_key" : img_media_id,
-											"old_role_name": old_item_role,
-											"type"  : 2
-										}
-										new_final_array[k] = new_changes;
-									}else{
-										var new_changes = {
-											"role" : "original",
-											"image_url" : imag_url_val,
-											"item_key" : img_media_id,
-											"old_role_name": old_item_role,
-											"type"  : 3
-										}
-									   new_final_array[k] = new_changes;
-									}
-								}
-							}
+                            if (v.item_type == 'IMAGE') {
+                                let match_index = past_item_array.indexOf(origi_url);
+                                var check_old_item_role = past_item_role_array[match_index];
+                                var count_old_array_role = check_old_item_role.length;
+                                var count_new_array_role = new_item_roles.length;
+                                var old_item_role = "original";
+                                if (count_old_array_role > 0) {
+                                    old_item_role = check_old_item_role[0];
+                                }
+                                if (count_old_array_role == count_new_array_role) {
+                                    if (check_old_item_role[0] == new_item_roles[0]) {
+                                        /* do nothing */
+                                    } else {
+                                        var new_changes = {
+                                            "role" : new_item_roles[0],
+                                            "image_url" : imag_url_val,
+                                            "item_key" : img_media_id,
+                                            "old_role_name": old_item_role,
+                                            "type"  : 1
+                                        }
+                                        new_final_array[k] = new_changes;
+                                    }
+                                } else {
+                                    if (count_new_array_role > 0) {
+                                        var new_changes = {
+                                            "role" : new_item_roles[0],
+                                            "image_url" : imag_url_val,
+                                            "item_key" : img_media_id,
+                                            "old_role_name": old_item_role,
+                                            "type"  : 2
+                                        }
+                                        new_final_array[k] = new_changes;
+                                    } else {
+                                        var new_changes = {
+                                            "role" : "original",
+                                            "image_url" : imag_url_val,
+                                            "item_key" : img_media_id,
+                                            "old_role_name": old_item_role,
+                                            "type"  : 3
+                                        }
+                                        new_final_array[k] = new_changes;
+                                    }
+                                }
+                            }
                         } 
                     });
                     if(new_final_array.length > 0){
@@ -918,7 +913,7 @@ $get_base_url = $block->getBaseUrl();
                             });
                         //});
                     } else {
-						if (all_selected_images != '') {
+                        if (all_selected_images != '') {
                             var myJsonString = JSON.stringify(all_selected_images);
                             jQuery('textarea[name="product[bynder_multi_img]"]').val(myJsonString);
                         } else {

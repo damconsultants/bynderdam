@@ -6,7 +6,10 @@ use DamConsultants\BynderDAM\Model\ResourceModel\Collection\BynderAutoReplaceDat
 
 class AutoReplaceProvider extends \Magento\Ui\DataProvider\AbstractDataProvider
 {
-
+    /**
+     * @var $collection
+     */
+    protected $collection;
     /**
      * @param BynderAutoReplaceDataCollectionFactory $BynderAutoReplaceDataCollectionFactory
      * @param string $name

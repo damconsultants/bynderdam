@@ -9,9 +9,21 @@ use Magento\Framework\View\Element\UiComponentFactory;
 class ReSyncData extends \Magento\Ui\Component\Listing\Columns\Column
 {
     /**
-     * @var urlBuilder
+     * @var $urlBuilder
      */
-    public $urlBuilder;
+    protected $urlBuilder;
+    /**
+     * @var $_resource
+     */
+    protected $_resource;
+    /**
+     * @var $bynderSycDataFactory
+     */
+    protected $bynderSycDataFactory;
+    /**
+     * @var $_productRepository
+     */
+    protected $_productRepository;
     /**
      * Closed constructor.
      *
@@ -73,9 +85,7 @@ class ReSyncData extends \Magento\Ui\Component\Listing\Columns\Column
                         }
                     }
                 } catch (Exception $e) {
-                    $connection = $this->_resource->getConnection();
-                    $tableName = $connection->getTableName("bynder_cron_data");
-                    $connection->delete($tableName, [$connection->quoteInto('sku = ?', $sku)]);
+                    $this->bynderSycDataFactory->create()->addFieldToFilter('sku', ['eq' => [$sku]])->delete();
                 }
             }
         }

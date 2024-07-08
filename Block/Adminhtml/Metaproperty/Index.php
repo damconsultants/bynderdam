@@ -8,19 +8,25 @@ use DamConsultants\BynderDAM\Model\ResourceModel\Collection\DefaultMetaPropertyC
 class Index extends \Magento\Backend\Block\Template
 {
     /**
-     * @var \DamConsultants\BynderDAM\Helper\Data
+     * @var Database
      */
-    protected $helperdata;
-
+    protected $_helperdata;
     /**
-     * @var \DamConsultants\BynderDAM\Model\MetaPropertyFactory
+     * @var Database
      */
-    protected $metaProperty;
-
+    protected $_metaProperty;
     /**
-     * @var \DamConsultants\BynderDAM\Model\ResourceModel\Collection\MetaPropertyCollectionFactory
+     * @var Database
      */
-    protected $metaPropertyCollectionFactory;
+    protected $_metaPropertyCollectionFactory;
+    /**
+     * @var Database
+     */
+    protected $_default_metaProperty_collection;
+    /**
+     * @var Database
+     */
+    protected $_storeManager;
 
     /**
      * Metaproperty

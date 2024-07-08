@@ -9,6 +9,7 @@ use Magento\Catalog\Model\ProductRepository;
 use Magento\Catalog\Model\Product\Action;
 use DamConsultants\BynderDAM\Model\BynderFactory;
 use DamConsultants\BynderDAM\Model\ResourceModel\Collection\MetaPropertyCollectionFactory;
+use DamConsultants\BynderDAM\Model\ResourceModel\Collection\BynderMediaTableCollectionFactory;
 
 class AutoAddFromMagento
 {
@@ -16,6 +17,58 @@ class AutoAddFromMagento
      * @var \Psr\Log\LoggerInterface
      */
     protected $logger;
+    /**
+     * @var $bynderMediaTable
+     */
+    protected $bynderMediaTable;
+    /**
+     * @var $bynderMediaTableCollectionFactory
+     */
+    protected $bynderMediaTableCollectionFactory;
+    /**
+     * @var $_productRepository
+     */
+    protected $_productRepository;
+    /**
+     * @var $datahelper
+     */
+    protected $datahelper;
+    /**
+     * @var $action
+     */
+    protected $action;
+    /**
+     * @var $_byndersycData
+     */
+    protected $_byndersycData;
+    /**
+     * @var $metaPropertyCollectionFactory
+     */
+    protected $metaPropertyCollectionFactory;
+    /**
+     * @var $storeManagerInterface
+     */
+    protected $storeManagerInterface;
+    /**
+     * @var $configWriter
+     */
+    protected $configWriter;
+    /**
+     * @var $resouce
+     */
+    protected $resouce;
+    /**
+     * @var $collectionFactory
+     */
+    protected $collectionFactory;
+    /**
+     * @var $bynder
+     */
+    protected $bynder;
+    /**
+     * @var $_resource
+     */
+    protected $_resource;
 
     /**
      * Featch Null Data To Magento
@@ -24,10 +77,13 @@ class AutoAddFromMagento
      * @param \Magento\Catalog\Model\ResourceModel\Product\CollectionFactory $collectionFactory
      * @param StoreManagerInterface $storeManagerInterface
      * @param \DamConsultants\BynderDAM\Helper\Data $DataHelper
-     * @param \DamConsultants\BynderDAM\Model\BynderAutoReplaceDataFactory $bynderAutoReplaceData,
+     * @param \DamConsultants\BynderDAM\Model\BynderAutoReplaceDataFactory $bynderAutoReplaceData
+     * @param DamConsultants\BynderDAM\Model\BynderMediaTableFactory $bynderMediaTable
+     * @param BynderMediaTableCollectionFactory $bynderMediaTableCollectionFactory
      * @param Action $action
      * @param MetaPropertyCollectionFactory $metaPropertyCollectionFactory
      * @param BynderFactory $bynder
+     * @param \Magento\Framework\App\ResourceConnection $resource
      */
     public function __construct(
         LoggerInterface $logger,
@@ -36,11 +92,13 @@ class AutoAddFromMagento
         StoreManagerInterface $storeManagerInterface,
         \DamConsultants\BynderDAM\Helper\Data $DataHelper,
         \DamConsultants\BynderDAM\Model\BynderAutoReplaceDataFactory $bynderAutoReplaceData,
+        \DamConsultants\BynderDAM\Model\BynderMediaTableFactory $bynderMediaTable,
+        BynderMediaTableCollectionFactory $bynderMediaTableCollectionFactory,
         Action $action,
         MetaPropertyCollectionFactory $metaPropertyCollectionFactory,
-        BynderFactory $bynder
+        BynderFactory $bynder,
+        \Magento\Framework\App\ResourceConnection $resource
     ) {
-
         $this->logger = $logger;
         $this->_productRepository = $productRepository;
         $this->collectionFactory = $collectionFactory;
@@ -48,8 +106,11 @@ class AutoAddFromMagento
         $this->action = $action;
         $this->_bynderAutoReplaceData = $bynderAutoReplaceData;
         $this->metaPropertyCollectionFactory = $metaPropertyCollectionFactory;
+        $this->bynderMediaTable = $bynderMediaTable;
+        $this->bynderMediaTableCollectionFactory = $bynderMediaTableCollectionFactory;
         $this->storeManagerInterface = $storeManagerInterface;
         $this->bynder = $bynder;
+        $this->_resource = $resource;
     }
     /**
      * Execute
@@ -62,19 +123,17 @@ class AutoAddFromMagento
         $logger = new \Zend_Log();
         $logger->addWriter($writer);
         $logger->info("Auto Add Image Value");
-		$enable = $this->datahelper->getAutoCronEnable();
-		if (!$enable) {
-			return false;
-		}
+        $enable = $this->datahelper->getAutoCronEnable();
+        if (!$enable) {
+            return false;
+        }
         $product_collection = $this->collectionFactory->create();
-
         $product_sku_limit = (int)$this->datahelper->getAutoProductSkuLimitConfig();
         if (!empty($product_sku_limit)) {
             $product_collection->getSelect()->limit($product_sku_limit);
         } else {
             $product_collection->getSelect()->limit(50);
         }
-
         $product_collection->addAttributeToSelect('*')
             ->addAttributeToFilter(
                 [
@@ -86,7 +145,7 @@ class AutoAddFromMagento
                     ['attribute' => 'bynder_auto_replace', 'null' => true]
                 ]
             )
-			->addAttributeToFilter('type_id', ['neq' => "configurable"])
+            ->addAttributeToFilter('type_id', ['neq' => "configurable"])
             ->load();
         $property_id = null;
         $collection = $this->metaPropertyCollectionFactory->create()->getData();
@@ -257,6 +316,62 @@ class AutoAddFromMagento
         $model->save();
     }
     /**
+     * Is Json
+     *
+     * @param string $sku
+     * @param array $m_id
+     * @param string $storeId
+     * @param string $product_ids
+     * @return $this
+     */
+    public function getInsertMedaiDataTable($sku, $m_id, $storeId, $product_ids)
+    {
+        $model = $this->bynderMediaTable->create();
+        $modelcollection = $this->bynderMediaTableCollectionFactory->create();
+        $modelcollection->addFieldToFilter('sku', ['eq' => [$sku]])->load();
+        $table_m_id = [];
+        if (!empty($modelcollection)) {
+            foreach ($modelcollection as $mdata) {
+                $table_m_id[] = $mdata['media_id'];
+            }
+        }
+        $media_diff = array_diff($m_id, $table_m_id);
+        foreach ($media_diff as $new_data) {
+            $data_image_data = [
+                'sku' => $sku,
+                'media_id' => trim($new_data),
+                'status' => "1",
+            ];
+            $model->setData($data_image_data);
+            $model->save();
+        }
+        $updated_values = [
+            'bynder_delete_cron' => 1
+        ];
+        $this->action->updateAttributes(
+            [$product_ids],
+            $updated_values,
+            $storeId
+        );
+    }
+    /**
+     * Is Json
+     *
+     * @param string $sku
+     * @param string $media_id
+     * @return $this
+     */
+    public function getDeleteMedaiDataTable($sku, $media_id)
+    {
+        $model = $this->bynderMediaTableCollectionFactory->create()->addFieldToFilter('sku', ['eq' => [$sku]])->load();
+        foreach ($model as $mdata) {
+            if ($mdata['media_id'] != $media_id) {
+                $this->bynderMediaTable->create()->load($mdata['id'])->delete();
+
+            }
+        }
+    }
+    /**
      * Get Data Item
      *
      * @param array $convert_array
@@ -294,9 +409,9 @@ class AutoAddFromMagento
                             if (is_array($data_value["thumbnails"]["img_alt_text"])) {
                                 $alt_text_vl = implode(" ", $data_value["thumbnails"]["img_alt_text"]);
                             }
-                            if(empty($alt_text_vl)){
-                                $new_bynder_alt_text[] = "###\n";    
-                            }else{
+                            if (empty($alt_text_vl)) {
+                                $new_bynder_alt_text[] = "###\n";
+                            } else {
                                 $new_bynder_alt_text[] = $alt_text_vl."\n";
                             }
                             /*$new_bynder_alt_text[] = (strlen($alt_text_vl) > 0)?$alt_text_vl."\n":"###\n";*/
@@ -465,7 +580,6 @@ class AutoAddFromMagento
                             $curt_img_role = $new_magento_role_option_array[$vv];
                         }
                         $find_video = strpos($new_image_value, "@@");
-                        
                         if (!$find_video) {
                             $logger->info("image_detail => ". $new_image_value);
                             $image_detail[] = [
@@ -557,109 +671,117 @@ class AutoAddFromMagento
                     }
                 }
                 $d_img_roll = "";
+                $d_media_id = [];
                 if (count($diff_image_detail) > 0) {
                     foreach ($diff_image_detail as $d_img) {
                         $d_img_roll = $d_img['image_role'];
+                        $d_media_id[] =  $d_img['bynder_md_id'];
+                    }
+                    $this->getInsertMedaiDataTable($product_sku_key, $d_media_id, $storeId, $product_ids);
+                }
+                $dv_media_id = [];
+                if (count($diff_video_detail) > 0) {
+                    foreach ($diff_image_detail as $d_video) {
+                        $dv_media_id[] =  $d_video['bynder_md_id'];
+                    }
+                    $this->getInsertMedaiDataTable($product_sku_key, $dv_media_id, $storeId, $product_ids);
+                }
+                $i_img_roll = "";
+                $image_link = "";
+                if (count($image_detail) > 0) {
+                    foreach ($image_detail as $img) {
+                        $image[] = $img['item_url'];
+                        if (!empty($img['image_role'])) {
+                            $image_link = $img['item_url'];
+                            $i_img_roll = $img['image_role'];
+                        }
                     }
                 }
-				//$logger->info("d_img_roll -> ". json_encode($d_img_roll));
-				$i_img_roll = "";
-				$image_link = "";
-				//$logger->info("image_detail -> ". print_r($image_detail, true));
-				if (count($image_detail) > 0) {
-					foreach ($image_detail as $img) {
-						$image[] = $img['item_url'];
-						if(!empty($img['image_role'])) {
-							$image_link = $img['item_url'];
-							$i_img_roll = $img['image_role'];
-						}
-					}
-				}
-				//$logger->info("i_img_roll -> ". json_encode($i_img_roll));
-				//$logger->info("image_link -> ". $image_link);
-				if (count($video_detail) > 0) {
-					foreach ($video_detail as $video) {
-						$video[] = $video['item_url'];
-					}
-				}
-				foreach ($item_old_value as $key1 => $img) {
-					if ($img['item_type'] == 'IMAGE') {
-						if (in_array($img['item_url'], $image)) {
-                            $item_key = array_search($img['item_url'],array_column($image_detail,"item_url"));
-							if (isset($d_img_roll)) {
-								$roll = $image_detail[$item_key]['image_role'];
-                            } else{
-								$roll = $img['image_role'];
+                if (count($video_detail) > 0) {
+                    foreach ($video_detail as $video) {
+                        $video[] = $video['item_url'];
+                    }
+                }
+                foreach ($item_old_value as $key1 => $img) {
+                    if ($img['item_type'] == 'IMAGE') {
+                        if (in_array($img['item_url'], $image)) {
+                            $item_key = array_search($img['item_url'], array_column($image_detail, "item_url"));
+                            if (isset($d_img_roll)) {
+                                $roll = $image_detail[$item_key]['image_role'];
+                            } else {
+                                $roll = $img['image_role'];
                             }
-							$new_image_detail[] = [
-								"item_url" => $img['item_url'],
-								"alt_text" => $image_detail[$item_key]['alt_text'],
-								"image_role" => $roll,
-								"item_type" => $img['item_type'],
-								"thum_url" => $img['thum_url'],
-								"bynder_md_id" => $img['bynder_md_id'],
-								"is_import" => $img['is_import']
-							];
-						}
-						$logger->info("new_image_detail -> ". print_r($new_image_detail, true));
-						$total_new_value = count($new_image_detail);
-						if ($total_new_value > 1) {
-							foreach ($new_image_detail as $nn => $n_img) {
-								if ($n_img['item_type'] == "IMAGE" && $nn != ($total_new_value - 1)) {
-									if ($new_magento_role_option_array[$item_key] != "###") {
-										$new_mg_role_array = (array)$new_magento_role_option_array[$item_key];
-										if (count($n_img["image_role"]) > 0 && count($new_mg_role_array) > 0) {
-											$result_val=array_diff($n_img["image_role"], $new_mg_role_array);
-											$new_image_detail[$nn]["image_role"] = $result_val;
-										}
-									}
-								}
-							}
-						}
-					} else {
-						if (count($video) > 0) {
-							if (in_array($img['item_url'], $video)) {
-								$new_video_detail[] = [
-									"item_url" => $img['item_url'],
-									"image_role" => null,
-									"item_type" => 'VIDEO',
-									"thum_url" => $img['thum_url'],
-									"bynder_md_id" => $img['bynder_md_id']
-								];
-							}
-						}
-					}
-				}
-				$logger->info("diff_image_detail => ". json_encode($diff_image_detail));
-				$logger->info("new_image_detail => ". json_encode($new_image_detail));
-				$merge_img_video = array_merge($new_image_detail, $new_video_detail);
-				$merge_diff_img_video = array_merge($diff_video_detail, $diff_image_detail);
-				$array_merge = array_merge($merge_img_video, $merge_diff_img_video);
-				$logger->info("array_merge => ". json_encode($array_merge));
-				foreach ($array_merge as $img) {
-					$type[] = $img['item_type'];
-				}
-				$flag = 0;
-				if (in_array("IMAGE", $type) && in_array("VIDEO", $type)) {
-					$flag = 1;
-				} elseif (in_array("IMAGE", $type)) {
-					$flag = 2;
-				} elseif (in_array("VIDEO", $type)) {
-					$flag = 3;
-				}
-				$new_value_array = json_encode($array_merge, true);
-				$updated_values = [
-					'bynder_multi_img' => $new_value_array,
-					'bynder_isMain' => $flag,
-					'bynder_auto_replace' => 1
-				];
-				
-				$this->action->updateAttributes(
-					[$product_ids],
-					$updated_values,
-					$storeId
-				);
-			}
+                            $new_image_detail[] = [
+                                "item_url" => $img['item_url'],
+                                "alt_text" => $image_detail[$item_key]['alt_text'],
+                                "image_role" => $roll,
+                                "item_type" => $img['item_type'],
+                                "thum_url" => $img['thum_url'],
+                                "bynder_md_id" => $img['bynder_md_id'],
+                                "is_import" => $img['is_import']
+                            ];
+                        }
+                        $total_new_value = count($new_image_detail);
+                        if ($total_new_value > 1) {
+                            foreach ($new_image_detail as $nn => $n_img) {
+                                if ($n_img['item_type'] == "IMAGE" && $nn != ($total_new_value - 1)) {
+                                    if ($new_magento_role_option_array[$item_key] != "###") {
+                                        $new_mg_role_array = (array)$new_magento_role_option_array[$item_key];
+                                        if (count($n_img["image_role"]) > 0 && count($new_mg_role_array) > 0) {
+                                            $result_val=array_diff($n_img["image_role"], $new_mg_role_array);
+                                            $new_image_detail[$nn]["image_role"] = $result_val;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        if (count($video) > 0) {
+                            if (in_array($img['item_url'], $video)) {
+                                $new_video_detail[] = [
+                                    "item_url" => $img['item_url'],
+                                    "image_role" => null,
+                                    "item_type" => 'VIDEO',
+                                    "thum_url" => $img['thum_url'],
+                                    "bynder_md_id" => $img['bynder_md_id']
+                                ];
+                            }
+                        }
+                    }
+                }
+                $logger->info("diff_image_detail => ". json_encode($diff_image_detail));
+                $logger->info("new_image_detail => ". json_encode($new_image_detail));
+                $merge_img_video = array_merge($new_image_detail, $new_video_detail);
+                $merge_diff_img_video = array_merge($diff_video_detail, $diff_image_detail);
+                $array_merge = array_merge($merge_img_video, $merge_diff_img_video);
+                $logger->info("array_merge => ". json_encode($array_merge));
+                $m_id = [];
+                foreach ($array_merge as $img) {
+                    $type[] = $img['item_type'];
+                    $m_id[] = $img['bynder_md_id'];
+                    $this->getDeleteMedaiDataTable($product_sku_key, $img['bynder_md_id']);
+                }
+                $this->getInsertMedaiDataTable($product_sku_key, $d_media_id, $storeId, $product_ids);
+                $flag = 0;
+                if (in_array("IMAGE", $type) && in_array("VIDEO", $type)) {
+                    $flag = 1;
+                } elseif (in_array("IMAGE", $type)) {
+                    $flag = 2;
+                } elseif (in_array("VIDEO", $type)) {
+                    $flag = 3;
+                }
+                $new_value_array = json_encode($array_merge, true);
+                $updated_values = [
+                    'bynder_multi_img' => $new_value_array,
+                    'bynder_isMain' => $flag,
+                    'bynder_auto_replace' => 1
+                ];
+                $this->action->updateAttributes(
+                    [$product_ids],
+                    $updated_values,
+                    $storeId
+                );
+            }
         } catch (Exception $e) {
             $logger->info("Sku => ". $product_sku_key ."error => ". $e->getMessage());
         }

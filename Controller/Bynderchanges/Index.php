@@ -33,6 +33,14 @@ class Index extends \Magento\Framework\App\Action\Action
      * @var $by_redirecturl
      */
     public $by_redirecturl;
+    /**
+     * @var $b_datahelper
+     */
+    protected $b_datahelper;
+    /**
+     * @var $metaPropertyCollectionFactory
+     */
+    protected $metaPropertyCollectionFactory;
 
     /**
      * Index

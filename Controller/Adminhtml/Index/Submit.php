@@ -8,9 +8,25 @@ use DamConsultants\BynderDAM\Model\ResourceModel\Collection\DefaultMetaPropertyC
 class Submit extends \Magento\Backend\App\Action
 {
     /**
-     * @var \Magento\Framework\View\Result\PageFactory
+     * @var $_helperData
      */
-    protected $resultPageFactory = false;
+    protected $_helperData;
+    /**
+     * @var $metaProperty
+     */
+    protected $metaProperty;
+    /**
+     * @var $metaPropertyCollectionFactory
+     */
+    protected $metaPropertyCollectionFactory;
+    /**
+     * @var $_defaultMetaPropertyCollectionFactory
+     */
+    protected $_defaultMetaPropertyCollectionFactory;
+    /**
+     * @var $resultPageFactory
+     */
+    protected $resultPageFactory;
 
     /**
      * Submit.

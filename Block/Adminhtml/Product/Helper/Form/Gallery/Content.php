@@ -56,6 +56,14 @@ class Content extends \Magento\Catalog\Block\Adminhtml\Product\Helper\Form\Galle
      * @var Database
      */
     private $fileStorageDatabase;
+    /**
+     * @var Database
+     */
+    private $request;
+    /**
+     * @var Database
+     */
+    private $b_datahelper;
 
     /**
      * Catalog product form gallery content
@@ -81,7 +89,7 @@ class Content extends \Magento\Catalog\Block\Adminhtml\Product\Helper\Form\Galle
         array $data = []
     ) {
         parent::__construct($context, $jsonEncoder, $mediaConfig, $data);
-        $this-> request = $httpRequest;
+        $this->request = $httpRequest;
         $this->b_datahelper = $bynderData;
     }
     /**

@@ -13,6 +13,54 @@ use \DamConsultants\BynderDAM\Model\DefaultMetaPropertyFactory;
 class SynMetaProperty extends \Magento\Framework\App\Action\Action
 {
     /**
+     * @var $_logger
+     */
+    protected $_logger;
+    /**
+     * @var $_productCollectionFactory
+     */
+    protected $_productCollectionFactory;
+    /**
+     * @var $productRepository
+     */
+    protected $productRepository;
+    /**
+     * @var $storeManager
+     */
+    protected $storeManager;
+    /**
+     * @var $productAction
+     */
+    protected $productAction;
+    /**
+     * @var $resultJsonFactory
+     */
+    protected $resultJsonFactory;
+    /**
+     * @var $_resultRedirect
+     */
+    protected $_resultRedirect;
+    /**
+     * @var $collection
+     */
+    protected $collection;
+    /**
+     * @var $_helperdata
+     */
+    protected $_helperdata;
+    /**
+     * @var $defaultMetaPropertyFactory
+     */
+    protected $defaultMetaPropertyFactory;
+    /**
+     * @var $_productRepositoryModel
+     */
+    protected $_productRepositoryModel;
+    /**
+     * @var $messageManager
+     */
+    protected $messageManager;
+    /**
      * Get
      *
      * @param \Magento\Framework\App\Action\Context $context

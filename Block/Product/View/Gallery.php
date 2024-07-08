@@ -54,7 +54,11 @@ class Gallery extends \Magento\Catalog\Block\Product\View\Gallery
     /**
      * @var \Magento\Framework\App\Request\Http
      */
-    public $request;
+    public $_request;
+    /**
+     * @var _registry
+     */
+    protected $_registry;
 
     /**
      * Gallery

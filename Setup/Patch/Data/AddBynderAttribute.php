@@ -69,7 +69,6 @@ class AddBynderAttribute implements DataPatchInterface
             'unique' => false,
             'apply_to' => ''
         ]);
-
         $eavSetup->removeAttribute(\Magento\Catalog\Model\Product::ENTITY, 'bynder_document');
         $eavSetup->addAttribute(\Magento\Catalog\Model\Product::ENTITY, 'bynder_document', [
             'group' => 'Product Details',
@@ -219,8 +218,6 @@ class AddBynderAttribute implements DataPatchInterface
             'used_in_product_listing' => true,
             'apply_to' => ''
         ]);
-
-
         $this->moduleDataSetup->getConnection()->endSetup();
     }
 

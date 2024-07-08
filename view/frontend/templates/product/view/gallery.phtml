@@ -15,9 +15,8 @@ $bynder_image = $block->getProduct()->getBynderMultiImg();
 $type = [];
 if (!empty($bynder_image)) {
     $json_decode = json_decode($bynder_image, true);
-    foreach( $json_decode as $data_image) {
+    foreach ($json_decode as $data_image) {
         $type[] = $data_image['item_type'];
-		
     }
 }
 $images = $block->getGalleryImages()->getItems();
@@ -80,14 +79,15 @@ if (!empty($one_img) && $one_img !='0') {
         $(document).on('gallery:loaded', function () {
             var $fotorama = jQuery('div.gallery-placeholder > div.fotorama');
             var fotorama = $fotorama.data('fotorama');
-            var data_array = '<?php echo json_encode($type); ?>';
+            var data_array = '<?= json_encode($type); ?>';
             var parsedTest = JSON.parse(data_array);
             if($.inArray("VIDEO", parsedTest) >= 0 ) {
                     $fotorama.on('fotorama:load', function fotorama_onLoad(e, fotorama, extra) {
                         if (extra.frame.type === 'iframe') {
                             extra.frame.$stageFrame.html(
                                 '<div class="fotorama-video-container video-unplayed video_control">'+
-                                '<video id="video-tag"  width="75%"><source src="' + extra.frame.src + '" type="video/mp4"></video></div>'
+                                '<video id="video-tag"  width="75%"><source src="'+ extra.frame.src +
+                                '" type="video/mp4"></video></div>'
                                 );
                         }
                     });

@@ -1,12 +1,71 @@
 <?php
 namespace DamConsultants\BynderDAM\Controller\Product;
 
+use DamConsultants\BynderDAM\Model\BynderTempDocDataFactory;
+use DamConsultants\BynderDAM\Model\ResourceModel\Collection\BynderTempDocDataCollectionFactory;
+
 class AddDocData extends \Magento\Framework\App\Action\Action
 {
     /**
-     * @var string $_pageFactory;
+     * @var $_pageFactory
      */
     protected $_pageFactory;
+    /**
+     * @var $_product
+     */
+    protected $_product;
+    /**
+     * @var $file
+     */
+    protected $file;
+    /**
+     * @var $resultJsonFactory
+     */
+    protected $resultJsonFactory;
+    /**
+     * @var $driverFile
+     */
+    protected $driverFile;
+    /**
+     * @var $storeManagerInterface
+     */
+    protected $storeManagerInterface;
+    /**
+     * @var $cookieManager
+     */
+    protected $cookieManager;
+    /**
+     * @var $productActionObject
+     */
+    protected $productActionObject;
+    /**
+     * @var $_registry
+     */
+    protected $_registry;
+    /**
+     * @var $_resource
+     */
+    protected $_resource;
+    /**
+     * @var $cookieMetadataFactory
+     */
+    protected $cookieMetadataFactory;
+    /**
+     * @var $bynderTempData
+     */
+    protected $bynderTempData;
+    /**
+     * @var $bynderTempDataCollectionFactory
+     */
+    protected $bynderTempDataCollectionFactory;
+    /**
+     * @var $bynderTempDocData
+     */
+    protected $bynderTempDocData;
+    /**
+     * @var $bynderTempDocDataCollectionFactory
+     */
+    protected $bynderTempDocDataCollectionFactory;
 
     /**
      * Add Data.
@@ -23,6 +82,8 @@ class AddDocData extends \Magento\Framework\App\Action\Action
      * @param \Magento\Framework\Registry $registry
      * @param \Magento\Framework\App\ResourceConnection $resource
      * @param \Magento\Framework\Stdlib\Cookie\CookieMetadataFactory $cookieMetadataFactory
+     * @param BynderTempDocDataFactory $bynderTempDocData
+     * @param BynderTempDocDataCollectionFactory $bynderTempDocDataCollectionFactory
      */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
@@ -36,7 +97,9 @@ class AddDocData extends \Magento\Framework\App\Action\Action
         \Magento\Store\Model\StoreManagerInterface $storeManagerInterface,
         \Magento\Framework\Registry $registry,
         \Magento\Framework\App\ResourceConnection $resource,
-        \Magento\Framework\Stdlib\Cookie\CookieMetadataFactory $cookieMetadataFactory
+        \Magento\Framework\Stdlib\Cookie\CookieMetadataFactory $cookieMetadataFactory,
+        BynderTempDocDataFactory $bynderTempDocData,
+        BynderTempDocDataCollectionFactory $bynderTempDocDataCollectionFactory,
     ) {
         $this->_pageFactory = $pageFactory;
         $this->_product = $product;
@@ -49,6 +112,8 @@ class AddDocData extends \Magento\Framework\App\Action\Action
         $this->_registry = $registry;
         $this->_resource = $resource;
         $this->cookieMetadataFactory = $cookieMetadataFactory;
+        $this->bynderTempDocData = $bynderTempDocData;
+        $this->bynderTempDocDataCollectionFactory = $bynderTempDocDataCollectionFactory;
         return parent::__construct($context);
     }
     /**
@@ -58,40 +123,51 @@ class AddDocData extends \Magento\Framework\App\Action\Action
      */
     public function execute()
     {
-        $connection = $this->_resource->getConnection();
-        $table_name = $connection->getTableName('bynder_temp_doc_data');
         $product_id = $this->getRequest()->getParam('product_id');
         $coockie_id = $this->getRequest()->getParam('doc_coockie_id');
-        $widen_doc = $this->getRequest()->getParam('doc');
+        $bynder_doc = $this->getRequest()->getParam('doc');
         if ($coockie_id == 0) {
             $data = [
-                "value" => $widen_doc,
+                "value" => $bynder_doc,
                 "product_id" => $product_id
             ];
-            $connection->insert($table_name, $data);
-            $lastAddedId = $connection->lastInsertId($table_name);
+            $bynderTempDocData = $this->bynderTempDocData->create();
+            $bynderTempDocData->setData($data);
+            $bynderTempDocData->save();
+            $collectionData = $this->bynderTempDocDataCollectionFactory->create()->load();
+            if (!empty($collectionData)) {
+                $lastAddedId = "";
+                foreach ($collectionData as $data) {
+                    $lastAddedId = $data['id'];
+                }
+            }
         } else {
-            $select = $connection->select()
-            ->from(
-                ['c' => $table_name],
-                ['*']
-            )
-            ->where("c.product_id = ?", $product_id);
-            $records = $connection->fetchAll($select);
+            $records = $this->bynderTempDocDataCollectionFactory->create();
+            $records->addFieldToFilter('product_id', ['eq' => [$product_id]])->load();
             if (empty($records)) {
                 $data = [
-                    "value" => $widen_doc,
+                    "value" => $bynder_doc,
                     "product_id" => $product_id
                 ];
-                $connection->insert($table_name, $data);
-                $lastAddedId = $connection->lastInsertId($table_name);
+                $bynderTempDocData = $this->bynderTempDocData->create();
+                $bynderTempDocData->setData($data);
+                $bynderTempDocData->save();
+                $collectionData = $this->bynderTempDocDataCollectionFactory->create()->load();
+                if (!empty($collectionData)) {
+                    $lastAddedId = "";
+                    foreach ($collectionData as $data) {
+                        $lastAddedId = $data['id'];
+                    }
+                }
             } else {
                 $new_data = [
-                    "value" => $widen_doc,
+                    "value" => $bynder_doc,
                     "product_id" => $product_id
                 ];
-                $where = ["id = ?" => $coockie_id];
-                $connection->update($table_name, $new_data, $where);
+                $bynderTempDocData = $this->bynderTempDocData->create();
+                $bynderTempDocData->load($coockie_id);
+                $bynderTempDocData->setData($new_data);
+                $bynderTempDocData->save();
                 $lastAddedId = $coockie_id;
             }
         }

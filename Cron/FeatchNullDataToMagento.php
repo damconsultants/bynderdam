@@ -9,6 +9,7 @@ use Magento\Catalog\Model\ProductRepository;
 use Magento\Catalog\Model\Product\Action;
 use DamConsultants\BynderDAM\Model\BynderFactory;
 use DamConsultants\BynderDAM\Model\ResourceModel\Collection\MetaPropertyCollectionFactory;
+use DamConsultants\BynderDAM\Model\ResourceModel\Collection\BynderMediaTableCollectionFactory;
 
 class FeatchNullDataToMagento
 {
@@ -16,6 +17,58 @@ class FeatchNullDataToMagento
      * @var \Psr\Log\LoggerInterface
      */
     protected $logger;
+    /**
+     * @var $bynderMediaTable
+     */
+    protected $bynderMediaTable;
+    /**
+     * @var $bynderMediaTableCollectionFactory
+     */
+    protected $bynderMediaTableCollectionFactory;
+    /**
+     * @var $_productRepository
+     */
+    protected $_productRepository;
+    /**
+     * @var $datahelper
+     */
+    protected $datahelper;
+    /**
+     * @var $action
+     */
+    protected $action;
+    /**
+     * @var $_byndersycData
+     */
+    protected $_byndersycData;
+    /**
+     * @var $metaPropertyCollectionFactory
+     */
+    protected $metaPropertyCollectionFactory;
+    /**
+     * @var $storeManagerInterface
+     */
+    protected $storeManagerInterface;
+    /**
+     * @var $configWriter
+     */
+    protected $configWriter;
+    /**
+     * @var $resouce
+     */
+    protected $resouce;
+    /**
+     * @var $collectionFactory
+     */
+    protected $collectionFactory;
+    /**
+     * @var $bynder
+     */
+    protected $bynder;
+    /**
+     * @var $_resource
+     */
+    protected $_resource;
 
     /**
      * Featch Null Data To Magento
@@ -25,9 +78,12 @@ class FeatchNullDataToMagento
      * @param StoreManagerInterface $storeManagerInterface
      * @param \DamConsultants\BynderDAM\Helper\Data $DataHelper
      * @param \DamConsultants\BynderDAM\Model\BynderSycDataFactory $byndersycData
+     * @param \DamConsultants\BynderDAM\Model\BynderMediaTableFactory $bynderMediaTable
+     * @param BynderMediaTableCollectionFactory $bynderMediaTableCollectionFactory
      * @param Action $action
      * @param MetaPropertyCollectionFactory $metaPropertyCollectionFactory
      * @param BynderFactory $bynder
+     * @param \Magento\Framework\App\ResourceConnection $resource
      */
     public function __construct(
         LoggerInterface $logger,
@@ -36,9 +92,12 @@ class FeatchNullDataToMagento
         StoreManagerInterface $storeManagerInterface,
         \DamConsultants\BynderDAM\Helper\Data $DataHelper,
         \DamConsultants\BynderDAM\Model\BynderSycDataFactory $byndersycData,
+        \DamConsultants\BynderDAM\Model\BynderMediaTableFactory $bynderMediaTable,
+        BynderMediaTableCollectionFactory $bynderMediaTableCollectionFactory,
         Action $action,
         MetaPropertyCollectionFactory $metaPropertyCollectionFactory,
-        BynderFactory $bynder
+        BynderFactory $bynder,
+        \Magento\Framework\App\ResourceConnection $resource
     ) {
 
         $this->logger = $logger;
@@ -48,8 +107,11 @@ class FeatchNullDataToMagento
         $this->action = $action;
         $this->_byndersycData = $byndersycData;
         $this->metaPropertyCollectionFactory = $metaPropertyCollectionFactory;
+        $this->bynderMediaTable = $bynderMediaTable;
+        $this->bynderMediaTableCollectionFactory = $bynderMediaTableCollectionFactory;
         $this->storeManagerInterface = $storeManagerInterface;
         $this->bynder = $bynder;
+        $this->_resource = $resource;
     }
     /**
      * Execute
@@ -58,17 +120,17 @@ class FeatchNullDataToMagento
      */
     public function execute()
     {
-		$enable = $this->datahelper->getFetchCronEnable();
-		if (!$enable) {
-			return false;
-		}
+        $enable = $this->datahelper->getFetchCronEnable();
+        if (!$enable) {
+            return false;
+        }
         $product_collection = $this->collectionFactory->create();
         $product_sku_limit = (int)$this->datahelper->getFetchProductSkuLimitConfig();
         if (!empty($product_sku_limit)) {
-			//echo "Not empty ". $product_sku_limit;
+            //echo "Not empty ". $product_sku_limit;
             $product_collection->getSelect()->limit($product_sku_limit);
         } else {
-			//echo "empty ". $product_sku_limit;
+            //echo "empty ". $product_sku_limit;
             $product_collection->getSelect()->limit(50);
         }
         $product_collection->addAttributeToSelect('*')
@@ -82,7 +144,7 @@ class FeatchNullDataToMagento
                     ['attribute' => 'bynder_cron_sync', 'null' => true]
                 ]
             )
-			->addAttributeToFilter('type_id', ['neq' => "configurable"])
+            ->addAttributeToFilter('type_id', ['neq' => "configurable"])
             ->load();
         $property_id = null;
         $collection = $this->metaPropertyCollectionFactory->create()->getData();
@@ -237,6 +299,62 @@ class FeatchNullDataToMagento
         $model->save();
     }
     /**
+     * Is Json
+     *
+     * @param string $sku
+     * @param string $m_id
+     * @param string $product_ids
+     * @param string $storeId
+     * @return $this
+     */
+    public function getInsertMedaiDataTable($sku, $m_id, $product_ids, $storeId)
+    {
+        $model = $this->bynderMediaTable->create();
+        $modelcollection = $this->bynderMediaTableCollectionFactory->create();
+        $modelcollection->addFieldToFilter('sku', ['eq' => [$sku]])->load();
+        $table_m_id = [];
+        if (!empty($modelcollection)) {
+            foreach ($modelcollection as $mdata) {
+                $table_m_id[] = $mdata['media_id'];
+            }
+        }
+        $media_diff = array_diff($m_id, $table_m_id);
+        foreach ($media_diff as $new_data) {
+            $data_image_data = [
+                'sku' => $sku,
+                'media_id' => trim($new_data),
+                'status' => "1",
+            ];
+            $model->setData($data_image_data);
+            $model->save();
+        }
+        $updated_values = [
+            'bynder_delete_cron' => 1
+        ];
+        $this->action->updateAttributes(
+            [$product_ids],
+            $updated_values,
+            $storeId
+        );
+    }
+    /**
+     * Is Json
+     *
+     * @param array $sku
+     * @param string $media_id
+     * @return $this
+     */
+    public function getDeleteMedaiDataTable($sku, $media_id)
+    {
+        $model = $this->bynderMediaTableCollectionFactory->create()->addFieldToFilter('sku', ['eq' => [$sku]])->load();
+        foreach ($model as $mdata) {
+            if ($mdata['media_id'] != $media_id) {
+                $this->bynderMediaTable->create()->load($mdata['id'])->delete();
+
+            }
+        }
+    }
+    /**
      * Get Data Item
      *
      * @param array $convert_array
@@ -269,9 +387,9 @@ class FeatchNullDataToMagento
                             if (is_array($data_value["thumbnails"]["img_alt_text"])) {
                                 $alt_text_vl = implode(" ", $data_value["thumbnails"]["img_alt_text"]);
                             }
-                            if(empty($alt_text_vl)){
-                                $new_bynder_alt_text[] = "###\n";    
-                            }else{
+                            if (empty($alt_text_vl)) {
+                                $new_bynder_alt_text[] = "###\n";
+                            } else {
                                 $new_bynder_alt_text[] = $alt_text_vl."\n";
                             }
                             $new_bynder_mediaid_text[] = $bynder_media_id;
@@ -473,9 +591,14 @@ class FeatchNullDataToMagento
                 }
                 
                 $marge = array_merge($image_detail, $video_detail);
+                $m_id = [];
                 foreach ($marge as $img) {
                     $type[] = $img['item_type'];
+                    $m_id[] = $img['bynder_md_id'];
+                    $this->getDeleteMedaiDataTable($product_sku_key, $img['bynder_md_id']);
                 }
+                $this->getInsertMedaiDataTable($product_sku_key, $m_id, $product_ids, $storeId);
+                
                 $flag = 0;
                 if (in_array("IMAGE", $type) && in_array("VIDEO", $type)) {
                     $flag = 1;
@@ -485,7 +608,6 @@ class FeatchNullDataToMagento
                     $flag = 3;
                 }
                 $new_value_array = json_encode($marge, true);
-                
                 $updated_values = [
                     'bynder_multi_img' => $new_value_array,
                     'bynder_isMain' => $flag,

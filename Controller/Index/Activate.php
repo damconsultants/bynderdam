@@ -5,6 +5,10 @@ namespace DamConsultants\BynderDAM\Controller\Index;
 class Activate extends \Magento\Framework\App\Action\Action
 {
     /**
+     * @var $_helperData
+     */
+    protected $_helperData;
+    /**
      * Activate
      * @param \Magento\Framework\App\Action\Context $context
      * @param \DamConsultants\BynderDAM\Helper\Data $helperData

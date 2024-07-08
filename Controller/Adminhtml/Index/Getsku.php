@@ -5,13 +5,35 @@ namespace DamConsultants\BynderDAM\Controller\Adminhtml\Index;
 class Getsku extends \Magento\Backend\App\Action
 {
     /**
-     * @var \Magento\Framework\View\Result\PageFactory
+     * @var protectedattribute.
+     *
      */
-    protected $resultPageFactory = false;
+    protected $protectedattribute;
+    /**
+     * @var collectionFactory.
+     *
+     */
+    protected $collectionFactory;
+    /**
+     * @var resultJsonFactory.
+     *
+     */
+    protected $resultJsonFactory;
+    /**
+     * @var productAttributeManagementInterface.
+     *
+     */
+    protected $productAttributeManagementInterface;
+    /**
+     * @var datahelper.
+     *
+     */
+    protected $datahelper;
 
     /**
      * Get Sku.
      * @param \Magento\Backend\App\Action\Context $context
+     * @param \DamConsultants\BynderDAM\Helper\Data $DataHelper
      * @param \Magento\Catalog\Model\ResourceModel\Eav\Attribute $attribute
      * @param \Magento\Framework\Controller\Result\JsonFactory $jsonFactory
      * @param \Magento\Catalog\Api\ProductAttributeManagementInterface $productAttributeManagementInterface
@@ -19,6 +41,7 @@ class Getsku extends \Magento\Backend\App\Action
      */
     public function __construct(
         \Magento\Backend\App\Action\Context $context,
+        \DamConsultants\BynderDAM\Helper\Data $DataHelper,
         \Magento\Catalog\Model\ResourceModel\Eav\Attribute $attribute,
         \Magento\Framework\Controller\Result\JsonFactory $jsonFactory,
         \Magento\Catalog\Api\ProductAttributeManagementInterface $productAttributeManagementInterface,
@@ -29,6 +52,7 @@ class Getsku extends \Magento\Backend\App\Action
         $this->collectionFactory = $collectionFactory;
         $this->resultJsonFactory = $jsonFactory;
         $this->productAttributeManagementInterface = $productAttributeManagementInterface;
+        $this->datahelper = $DataHelper;
     }
     /**
      * Execute
@@ -37,7 +61,10 @@ class Getsku extends \Magento\Backend\App\Action
      */
     public function execute()
     {
-
+        $current_time = strtotime((string)date('Y-m-03'));
+        $bynder_auth["last_cron_time"] = $current_time;
+        $get_api_delete_details = $this->datahelper->getCheckBynderSideDeleteData($bynder_auth);
+        $response = json_decode($get_api_delete_details, true);
         if (!$this->getRequest()->isAjax()) {
             $this->_forward('noroute');
             return;
@@ -52,7 +79,7 @@ class Getsku extends \Magento\Backend\App\Action
         $productcollection = $this->collectionFactory->create()
             ->addAttributeToSelect('*')
             ->addAttributeToFilter('status', \Magento\Catalog\Model\Product\Attribute\Source\Status::STATUS_ENABLED)
-			->addAttributeToFilter('type_id', ['neq' => "configurable"]); 
+            ->addAttributeToFilter('type_id', ['neq' => "configurable"]);
         if (count($attribute) > 0) {
             foreach ($attribute as $value) {
                 $id[] = $value['attribute_set_id'];

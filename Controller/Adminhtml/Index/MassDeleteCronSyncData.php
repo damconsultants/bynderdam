@@ -18,6 +18,11 @@ class MassDeleteCronSyncData extends Action
      */
     public $filter;
     /**
+     * @var bynderFactory.
+     *
+     */
+    protected $bynderFactory;
+    /**
      * Mass Delete
      *
      * @param Context $context

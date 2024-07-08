@@ -84,4 +84,34 @@
          <column name="id" />
       </constraint>
    </table>
+   <table name="bynder_delete_data" resource="default" engine="innodb" comment="Bynder Delete Data">
+      <column xsi:type="int" name="id" padding="7" unsigned="false" nullable="false" identity="true" comment="id" />
+      <column xsi:type="text" name="sku" nullable="true"  comment="Product sku" />
+      <column xsi:type="text" name="media_id" nullable="true"  comment="Bynder Data Media id " />
+      <column xsi:type="datetime" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+      <column xsi:type="datetime" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="Updated At"/>
+      <constraint xsi:type="primary" referenceId="PRIMARY">
+         <column name="id" />
+      </constraint>
+   </table>
+   <table name="media_data" resource="default" engine="innodb" comment="Media Data">
+      <column xsi:type="int" name="id" padding="7" unsigned="false" nullable="false" identity="true" comment="id" />
+      <column xsi:type="text" name="sku" nullable="true"  comment="Product sku" />
+      <column xsi:type="text" name="media_id" nullable="true"  comment="Bynder Data Media id " />
+	  <column xsi:type="int" name="status" nullable="false" comment="Status" />
+      <column xsi:type="datetime" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+      <column xsi:type="datetime" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="Updated At"/>
+      <constraint xsi:type="primary" referenceId="PRIMARY">
+         <column name="id" />
+      </constraint>
+   </table>
+   <table name="api_response_media_data" resource="default" engine="innodb" comment="Media Data">
+      <column xsi:type="int" name="id" padding="7" unsigned="false" nullable="false" identity="true" comment="id" />
+      <column xsi:type="text" name="media_id" nullable="true"  comment="Bynder Data Media id" />
+      <column xsi:type="datetime" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+      <column xsi:type="datetime" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="Updated At"/>
+      <constraint xsi:type="primary" referenceId="PRIMARY">
+         <column name="id" />
+      </constraint>
+   </table>
 </schema>

@@ -39,5 +39,13 @@
            resource="DamConsultants_BynderDAM::menu_item1"
            />
        <!-- END:   new node -->
+	   <!-- START: new node -->
+       <add id="DamConsultants_BynderDAM::menu_item4"
+           title="Delete Cron Action Log" module="DamConsultants_BynderDAM"
+           sortOrder="10" parent="DamConsultants_BynderDAM::menu"
+           action="bynder/index/deletecrongrid"
+           resource="DamConsultants_BynderDAM::menu_item4"
+           />
+       <!-- END:   new node -->
    </menu>
 </config> 
