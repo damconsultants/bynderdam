@@ -185,7 +185,7 @@ class Gallery extends \Magento\Catalog\Block\Product\View\Gallery
                         'type' => ($values['item_type'] == 'IMAGE') ? 'image' : 'video',
                         'videoUrl' => ($values['item_type'] == 'VIDEO') ? $values['item_url'] : null,
                         "src" => ($values['item_type'] == 'VIDEO') ? $values['item_url'] : null,
-                        "type" => ($values['item_type'] == 'VIDEO') ? 'iframe' : null
+                        "type" => ($values['item_type'] == 'VIDEO') ? 'iframe' : 'image'
                     ]);
                     $imagesItems[] = $imageItem->toArray();
                 }
@@ -234,7 +234,7 @@ class Gallery extends \Magento\Catalog\Block\Product\View\Gallery
                         'type' => ($values['item_type'] == 'IMAGE') ? 'image' : 'video',
                         'videoUrl' => ($values['item_type'] == 'VIDEO') ? $values['item_url'] : null,
                         "src" => ($values['item_type'] == 'VIDEO') ? $values['item_url'] : null,
-                        "type" => ($values['item_type'] == 'VIDEO') ? 'iframe' : null
+                        "type" => ($values['item_type'] == 'VIDEO') ? 'iframe' : 'image'
                     ]);
                     $imagesItems[] = $imageItem->toArray();
                 }

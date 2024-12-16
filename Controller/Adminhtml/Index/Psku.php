@@ -684,7 +684,8 @@ class Psku extends \Magento\Backend\App\Action
                     $this->getInsertDataTable($data_image_data);
                     $updated_values = [
                         'bynder_multi_img' => $new_value_array,
-                        'bynder_isMain' => $flag
+                        'bynder_isMain' => $flag,
+						'use_bynder_cdn' => 1
                     ];
                     $this->productAction->updateAttributes(
                         [$product_ids],
@@ -763,7 +764,8 @@ class Psku extends \Magento\Backend\App\Action
                     
                     $updated_values = [
                         'bynder_multi_img' => $new_value_array,
-                        'bynder_isMain' => $flag
+                        'bynder_isMain' => $flag,
+						'use_bynder_cdn' => 1
                     ];
                     $this->productAction->updateAttributes(
                         [$product_ids],
@@ -825,7 +827,8 @@ class Psku extends \Magento\Backend\App\Action
                     $this->getInsertDataTable($data_video_data);
                     $updated_values = [
                         'bynder_multi_img' => $new_value_array,
-                        'bynder_isMain' => $flag
+                        'bynder_isMain' => $flag,
+						'use_bynder_cdn' => 1
                     ];
                     $this->productAction->updateAttributes(
                         [$product_ids],
@@ -875,7 +878,8 @@ class Psku extends \Magento\Backend\App\Action
                     $this->getInsertDataTable($data_video_data);
                     $updated_values = [
                         'bynder_multi_img' => $new_value_array,
-                        'bynder_isMain' => $flag
+                        'bynder_isMain' => $flag,
+						'use_bynder_cdn' => 1
                     ];
                     $this->productAction->updateAttributes(
                         [$product_ids],

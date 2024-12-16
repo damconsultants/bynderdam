@@ -90,14 +90,20 @@ require([
 						}
 						else if (data.status == 1) {
 
-							var type_design = "";
-							type_design += '<div class="main-part bynder-imgbox-div">' +
-												'<div class="middle-content">' +
-													'<div class="main-one image-boxs" >';
+							 var type_design = "<style>"+
+                            ".image-boxs {display: grid; grid-template-columns: repeat(5, 1fr); grid-column-gap: 5px;}"+
+                            ".image-boxs .m-box"+
+                            "{border: 1px solid rgba(0, 0, 0, 0.8); margin: 3px; text-align: center; padding: 5px;}"+
+                            ".m-content label { font-weight: 800; }"+
+                            "</style>";
 
-							$.each(data.data, function (index, r) {
+							type_design += '<div class="main-part bynder-imgbox-div">' +
+                                '<div class="middle-content">' +
+                                '<div class="main-one image-boxs" >';
+
+							/*$.each(data.data, function (index, r) {
 								$.each(r, function (i, res) {
-									var dataset_tag = '<img src="' + res.image_link + '">';
+									var dataset_tag = '<img src="' + res.public_url + '">';
 									total_images++;
 
 									if(res.dataset_type == "VIDEO") {
@@ -136,7 +142,106 @@ require([
 									}
 
 								});
-							});
+							});*/
+							$.each(data.data, function(index, r) {
+                                        $.each(r, function(i, res) {
+                                            
+                                           //if(i.isdigit()){                                          
+                                            var item_type = res.dataset_type;
+                                            if (res.image_link == null) {
+                                                type_design += '<h5 style="color:red;">'+
+                                                                'You don\'t have access.<img src="'+res.main_link1+'">'+
+                                                                'Please Make It Public from Bynder</h5>';
+                                                return false;
+                                            } else {
+                                               
+                                                var download_link = res.download_link;
+                                                
+                                                var original_img_url = download_link.split("?");
+                                                var dataset_tag = '<img src="' + res.image_link + '">';
+                                                total_images++;
+                                                
+                                                if (item_type == "VIDEO") {
+                                                    dataset_tag = '<video width="100%" controls>'+
+                                                                   '<source src="'+res.image_link+'" type="video/mp4">'+
+                                                                   '<source src="'+res.main_link+'" type="video/ogg">'+
+                                                                   'Your browser does not support HTML video.</video>';
+                                                }
+
+                                                var dataset_size = '( Size: ' + res.size + ')'
+                                                if (res.size == "0x0") {
+                                                    dataset_size = " ";
+                                                }
+
+                                                if (res.size == "0x0" && item_type == "DOCUMENT") {
+                                                    type_design += '<div class="m-box">' +
+                                                    '<div class="m-img">' +
+                                                    dataset_tag +
+                                                    '</div>' +
+                                                    '<div class="m-content">' +
+                                                    '<input type="checkbox" class="image_types"'+
+                                                    'id="image_type_' + total_images + '"'+
+                                                    '"data-alttext"="'+r.thumbnails.img_alt_text+'"'+
+                                                    '"data-imagerole"="'+r.thumbnails.all_magento_role_options+'"'+
+                                                    'name="image_type_' + index + '"'+
+                                                    'data-itemType="'+item_type+'"value="'+res.type+index +'">'+
+                                                    '<label for="image_type_'+total_images+'">'+
+                                                        res.type +" "+dataset_size+
+                                                    '</label>'+
+                                                    '</div>' +
+                                                    '</div>';
+                                                }
+                                                if (item_type == "IMAGE" || item_type == "VIDEO") {
+                                                    if (item_type == "IMAGE") {
+                                                        var name_od_the_image = res.type;
+                                                    } else {
+                                                        var name_od_the_image = res.name;
+                                                    }
+                                                    if (res.size != "0x0") {
+                                                        type_design += '<div class="m-box">' +
+                                                        '<div class="m-img">' +
+                                                        dataset_tag +
+                                                        '</div>' +
+                                                        '<div class="m-content">' +
+                                                        '<input type="checkbox"'+
+                                                        '"data-alttext"="'+r.thumbnails.img_alt_text+'"'+
+                                                        'class="image_types" id="image_type_' + total_images + '"'+
+                                                        'name="image_type_'+index+'"'+
+                                                        'data-itemType="'+item_type+'"'+
+                                                        '"data-imagerole"="'+r.thumbnails.all_magento_role_options+'"'+
+                                                        'value="' + res.type + index + '">'+
+                                                        '<label for="image_type_' + total_images + '">'+ 
+                                                            name_od_the_image + " " + dataset_size + 
+                                                        '</label>' +
+                                                        '</div>' +
+                                                        '</div>';
+                                                    } else if (item_type == "VIDEO") {
+                                                    type_design += '<div class="m-box">' +
+                                                    '<div class="m-img">' +
+                                                    dataset_tag +
+                                                    '</div>' +
+                                                    '<div class="m-content">' +
+                                                    '<input type="checkbox" class="image_types"'+
+                                                    'id="image_type_'+total_images+'"'+
+                                                    '"data-alttext"="'+r.thumbnails.img_alt_text+'"'+
+                                                    '"data-imagerole"="'+r.thumbnails.all_magento_role_options+'"'+
+                                                    'name="image_type_'+index +'"'+
+                                                    'data-itemType="'+item_type+'"'+
+                                                    'value="' + res.type + index + '">' +
+                                                    '<label for="image_type_' + total_images + '">' + 
+                                                        name_od_the_image + " " + dataset_size + 
+                                                    '</label>' +
+                                                    '</div>' +
+                                                    '</div>';
+                                                    }
+                                                }
+
+                                            }
+                                           
+                                        //} 
+
+                                        });
+                                    });
 							type_design += '</div> </div> </div>';
 							$("#compactViewContainer").html(type_design);
 
@@ -171,7 +276,7 @@ require([
 														
 														console.log(res);
 														if(res.dataset_type == "IMAGE") {
-															tag_html += '<img src="' + res.s3_link + '" class="bynder-view" >';
+															tag_html += '<img src="' + res.public_url + '" class="bynder-view" >';
 														}
 														else if(res.dataset_type == "VIDEO") {
 															if(video_url[res.bynderid] != undefined) {

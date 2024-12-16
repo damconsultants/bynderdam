@@ -774,7 +774,8 @@ class AutoAddFromMagento
                 $updated_values = [
                     'bynder_multi_img' => $new_value_array,
                     'bynder_isMain' => $flag,
-                    'bynder_auto_replace' => 1
+                    'bynder_auto_replace' => 1,
+					'use_bynder_cdn' => 1
                 ];
                 $this->action->updateAttributes(
                     [$product_ids],

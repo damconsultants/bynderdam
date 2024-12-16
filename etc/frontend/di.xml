@@ -3,7 +3,7 @@
 <preference for="Magento\Catalog\Block\Product\View\Gallery" type="DamConsultants\BynderDAM\Block\Product\View\Gallery" />
 <preference for="Magento\Catalog\Block\Product\ImageFactory" type="DamConsultants\BynderDAM\Block\Product\ImageFactory" />
 <preference for="Magento\Swatches\Block\Product\Renderer\Configurable" type="DamConsultants\BynderDAM\Block\Product\Renderer\Configurable" />
-<preference for="Magento\Swatches\Block\Product\Renderer\Listing\Configurable" type="DamConsultants\BynderDAM\Block\Product\Renderer\Configurable" />
+<preference for="Magento\Swatches\Block\Product\Renderer\Listing\Configurable" type="DamConsultants\BynderDAM\Block\Product\Renderer\Listing\Configurable" />
 <preference for="Magento\Swatches\Helper\Data" type="DamConsultants\BynderDAM\Helper\SwatchData" />
 <type name="Magento\Checkout\CustomerData\AbstractItem">
     <plugin name="Change_Product_Image_In_Minicart" type="DamConsultants\BynderDAM\Plugin\Minicart\Image" sortOrder="1"/>
