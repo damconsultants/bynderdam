@@ -13,23 +13,27 @@ class Configurable
     protected $jsonDecoder;
     protected $productHelper;
     protected $helper;
+	protected $bynderhelper;
 
     public function __construct(
         DecoderInterface $jsonDecoder,
         EncoderInterface $jsonEncoder,
         ProductHelper $productHelper,
-        \Magento\ConfigurableProduct\Helper\Data $helper
+        \Magento\ConfigurableProduct\Helper\Data $helper,
+		\DamConsultants\BynderDAM\Helper\Data $bynderhelper
     ) {
         $this->jsonEncoder = $jsonEncoder;
         $this->jsonDecoder = $jsonDecoder;
         $this->helper = $helper;
         $this->productHelper = $productHelper;
+		$this->bynderhelper = $bynderhelper;
     }
 
     public function afterGetJsonConfig(ConfigurableBlock $subject, $result)
     {
         $result = $this->jsonDecoder->decode($result);
         $result['images'] = $this->getOptionImages($subject);
+		$result['enable'] = $this->bynderhelper->byndeimageconfig();
         return $this->jsonEncoder->encode($result);
     }
 

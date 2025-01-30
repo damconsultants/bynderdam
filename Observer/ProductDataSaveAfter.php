@@ -159,6 +159,8 @@ class ProductDataSaveAfter implements ObserverInterface
         $all_meta_properties = $metaProperty_collection = $this->metaPropertyCollectionFactory->create()->getData();
         $collection_data_value = [];
         $collection_data_slug_val = [];
+        $document = "";
+        $image = "";
         if ($image_coockie_id != 0) {
             $bynderTempdata = $this->bynderTempDataCollectionFactory->create();
             $bynderTempdata->addFieldToFilter('id', $image_coockie_id)->load();
@@ -184,6 +186,8 @@ class ProductDataSaveAfter implements ObserverInterface
                     $document = $recorddoc['value'];
                 }
             }
+        } else {
+            $document = $bynder_document;
         }
         if (count($metaProperty_collection) >= 1) {
             foreach ($metaProperty_collection as $key => $collection_value) {

@@ -195,7 +195,7 @@ class Data extends AbstractHelper
      */
     public function byndeimageconfig()
     {
-        return (string) $this->getStoreConfig(self::RADIO_BUTTON);
+        return (bool) $this->getStoreConfig(self::RADIO_BUTTON);
     }
     /**
      * Get Product Sku Limit Config

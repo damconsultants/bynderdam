@@ -430,9 +430,9 @@ $get_base_url = $block->getBaseUrl();
                                                 return false;
                                             } else {
                                                
-                                                var download_link = res.download_link;
+                                                //var download_link = res.download_link;
                                                 
-                                                var original_img_url = download_link.split("?");
+                                                //var original_img_url = download_link.split("?");
                                                 var dataset_tag = '<img src="' + res.image_link + '">';
                                                 total_images++;
                                                 
@@ -554,10 +554,11 @@ $get_base_url = $block->getBaseUrl();
                                                     $.each(data.data, function(index, r) {
                                                         var image_links_test = assets[index].url;
                                                         $.each(r, function(i, res) {
-                                                            console.log("res => ", res);
+                                                            // console.log("res => ", res);
                                                             var bynder_md_id = res.bynderid;
                                                             image_links_test += "&&thumb_link=" + res.image_link + "&&"
                                                             var type_val = res.type + index;
+                                                            // console.log(type_val);
                                                             if ($.inArray(type_val, selected_types) != -1) {
                                                                 if (res.dataset_type == "IMAGE") {
                                                                     img_url += res.image_link + "\n";

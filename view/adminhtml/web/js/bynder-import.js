@@ -9,14 +9,24 @@ require([
   jQuery("body").append(
     '<div id="popup-modal" style="display:none;"><div id="compactViewContainer"></div></div>'
   );
-  
-  /* jQuery("#cms_bynder_action").bind("click", function () { */
-  jQuery(".cms_bynder_action_btn").bind("click", function () {
-    var btn_class = jQuery(this).attr("class");
-    var exp = btn_class.split(" ");
-    var b_url = exp[exp.length - 1];
+  jQuery(document).on("click", ".icon-admin-pagebuilder-systems", function () {
+    let interval = setInterval(function () {
+      if (jQuery('div[data-index="video_source"]').length) {
+        jQuery('div[data-index="video_source"]').append(
+          '<button class="video_bynder_action_btn">Import Bynder Video</button>'
+        );
+        if (jQuery(".video_bynder_action_btn").length) {
+          clearInterval(interval);
+        }
+      }
+    }, 100);
+  });
+  jQuery(document).on("click", ".video_bynder_action_btn", function () {
+    var baseUrl = window.BASE_URL;
+    var url = new URL(baseUrl);
+    var baseUrl = url.origin + "/";
 
-    var AjaxUrl = b_url + "bynder/index";
+    var AjaxU = baseUrl + "bynder/index";
     var docicon = "https://img.icons8.com/cotton/2x/regular-document.png";
     var p_id = jQuery(this).parent().parent().attr("id");
     var ident = "#";
@@ -36,7 +46,7 @@ require([
     BynderCompactView.open({
       /* mode:"SingleSelect", */
       mode: "MultiSelect",
-      assetTypes: ["image", /* "audio", */ "video", "document"],
+      assetTypes: ["video"],
       onSuccess: function (assets, additionalInfo) {
         console.log("Successfull Bynder Click...");
         var result = assets[0];
@@ -75,7 +85,7 @@ require([
 
           $.ajax({
             showLoader: true,
-            url: AjaxUrl,
+            url: AjaxU,
             type: "POST",
             data: {
               databaseId: dataset_ids,
@@ -213,12 +223,7 @@ require([
                               } else if (res.dataset_type == "VIDEO") {
                                 if (video_url[res.bynderid] != undefined) {
                                   var v_url = video_url[res.bynderid];
-                                  tag_html +=
-                                    '<video controls class="bynder-view" ><source src="' +
-                                    v_url +
-                                    '" type="video/mp4"><source src="' +
-                                    v_url +
-                                    '" type="video/ogg">Your browser does not support HTML video.</video>';
+                                  tag_html += v_url;
                                 }
                               } else if (res.dataset_type == "DOCUMENT") {
                                 tag_html +=
@@ -236,49 +241,12 @@ require([
                         });
 
                         if (p_id != "" && p_id != undefined) {
-                          var cursorPos = jQuery(
-                            ident + p_id + " textarea"
-                          ).prop("selectionStart");
-                          var v = jQuery(ident + p_id + " textarea").val();
-                          var textBefore = v.substring(0, cursorPos);
-                          var textAfter = v.substring(cursorPos, v.length);
-                          jQuery(ident + p_id + " textarea").val(
-                            textBefore + tag_html + textAfter
-                          );
-
-                          var tx_id = jQuery(ident + p_id + " textarea").attr(
-                            "id"
-                          );
-                          if (tx_id != "" && tx_id != undefined) {
-                            wysiwygcompany_description = new wysiwygSetup(
-                              tx_id,
-                              {
-                                width: "99%",
-                                height: "600px",
-                                /* "value":tag_html, */
-                                plugins: [{ name: "image" }], // for image
-                                tinymce4: {
-                                  toolbar:
-                                    "formatselect | bold italic underline | alignleft aligncenter alignright | bullist numlist | link table charmap",
-                                  plugins:
-                                    "advlist autolink lists link charmap media noneditable table contextmenu paste code help table",
-                                },
-                              }
-                            );
-                            wysiwygcompany_description.setup("exact");
-
-                            setTimeout(function () {
-                              jQuery(
-                                ident +
-                                  p_id +
-                                  " .mce-container-body.mce-flow-layout div[aria-label='Bold'] button"
-                              )[0].click();
-                            }, 500);
-                          }
+                          jQuery("input[name='video_source']")
+                            .val(tag_html)
+                            .trigger("change");
                         } else {
                           console.log("else section");
                         }
-
                       } else {
                         alert("Sorry, you not selected any type ?");
                       }
