@@ -901,4 +901,15 @@ class Data extends AbstractHelper
         $response = '{"status":1,"data":[{"id":"90261277-77FC-4DEB-8C5021715E9A1D38"},{"id":"D88487A1-C6E9-4202-B362AEEA91CDB0D1"}]}';
         return $response;*/
     }
+
+     /**
+     * replaceto special string
+     * @param string $og_sku
+     * @return string $new_string
+     */
+    public function replacetoSpecialString($og_sku) {
+        $utf_og_sku = iconv('UTF-8', 'ISO-8859-1', $og_sku); 
+        $new_string = preg_replace('/[^a-zA-Z0-9-]/', '_', $utf_og_sku);
+        return $new_string;
+    }
 }

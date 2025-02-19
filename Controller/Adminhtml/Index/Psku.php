@@ -146,7 +146,8 @@ class Psku extends \Magento\Backend\App\Action
             if (count($productSku) > 0) {
                 foreach ($productSku as $sku) {
                     if ($sku != "") {
-                        $bd_sku = trim(preg_replace('/[^A-Za-z0-9-]/', '_', $sku));
+                        /*$bd_sku = trim(preg_replace('/[^A-Za-z0-9-]/', '_', $sku));*/
+                        $bd_sku = $this->datahelper->replacetoSpecialString($sku);
                         $get_data = $this->datahelper->getImageSyncWithProperties($bd_sku, $property_id, $collection_value);
                         $getIsJson = $this->getIsJSON($get_data);
                         if (!empty($get_data) && $getIsJson) {
