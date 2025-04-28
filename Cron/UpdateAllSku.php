@@ -1,84 +1,67 @@
 <?php
 
-namespace DamConsultants\BynderDAM\Controller\Adminhtml\Index;
+namespace DamConsultants\BynderDAM\Cron;
 
+use Psr\Log\LoggerInterface;
 use DamConsultants\BynderDAM\Model\ResourceModel\Collection\MetaPropertyCollectionFactory;
 use DamConsultants\BynderDAM\Model\ResourceModel\Collection\BynderMediaTableCollectionFactory;
+use DamConsultants\BynderDAM\Model\ResourceModel\Collection\MagentoSkuCollectionFactory;
+use DamConsultants\BynderDAM\Model\ResourceModel\MagentoSku;
+use Magento\Framework\App\ResourceConnection;
+use Exception;
 
-class Psku extends \Magento\Backend\App\Action
+class UpdateAllSku
 {
     /**
      * @var \Magento\Framework\View\Result\PageFactory
      */
     protected $resultPageFactory = false;
     /**
-     * @var logger
-     */
-    protected $logger;
-    /**
-     * @var bynderMediaTable
-     */
-    protected $bynderMediaTable;
-    /**
-     * @var bynderMediaTableCollectionFactory
-     */
-    protected $bynderMediaTableCollectionFactory;
-    /**
-     * @var _productRepository
-     */
-    protected $_productRepository;
-    /**
-     * @var datahelper
-     */
-    protected $datahelper;
-    /**
-     * @var productAction
-     */
-    protected $productAction;
-    /**
-     * @var _byndersycData
-     */
-    protected $_byndersycData;
-    /**
-     * @var metaPropertyCollectionFactory
-     */
-    protected $metaPropertyCollectionFactory;
-    /**
-     * @var storeManagerInterface
-     */
-    protected $storeManagerInterface;
-    /**
-     * @var configWriter
-     */
-    protected $configWriter;
-    /**
-     * @var resouce
-     */
-    protected $resouce;
-    /**
-     * @var collectionFactory
-     */
-    protected $collectionFactory;
-    /**
-     * @var bynder
-     */
-    protected $bynder;
-    /**
-     * @var _resource
-     */
-    protected $_resource;
-    /**
-     * @var resultJsonFactory
+     * @var $resultJsonFactory
      */
     protected $resultJsonFactory;
     /**
-     * @var product
+     * @var $productAction
+     */
+    protected $productAction;
+    /**
+     * @var $storeManagerInterface
+     */
+    protected $storeManagerInterface;
+    /**
+     * @var $metaPropertyCollectionFactory
+     */
+    protected $metaPropertyCollectionFactory;
+    /**
+     * @var $bynderMediaTable
+     */
+    protected $bynderMediaTable;
+    /**
+     * @var $bynderMediaTableCollectionFactory
+     */
+    protected $bynderMediaTableCollectionFactory;
+    /**
+     * @var $datahelper
+     */
+    protected $datahelper;
+    /**
+     * @var $_byndersycData
+     */
+    protected $_byndersycData;
+    /**
+     * @var $_productRepository
+     */
+    protected $_productRepository;
+    /**
+     * @var $product
      */
     protected $product;
+    protected $resource;
+	protected $magentoSkuCollectionFactory;
+	protected $magentoSku;
 
     /**
      * Product Sku.
-     * @param \Magento\Backend\App\Action\Context $context
      * @param \Magento\Catalog\Model\Product\Action $action
      * @param \Magento\Store\Model\StoreManagerInterface $storeManagerInterface
      * @param \DamConsultants\BynderDAM\Model\BynderConfigSyncDataFactory $byndersycData
@@ -89,144 +72,164 @@ class Psku extends \Magento\Backend\App\Action
      * @param MetaPropertyCollectionFactory $metaPropertyCollectionFactory
      * @param \DamConsultants\BynderDAM\Helper\Data $DataHelper
      * @param \Magento\Framework\Controller\Result\JsonFactory $jsonFactory
-     * @param \Magento\Framework\App\ResourceConnection $resource
      */
     public function __construct(
-        \Magento\Backend\App\Action\Context $context,
         \Magento\Catalog\Model\Product\Action $action,
         \Magento\Store\Model\StoreManagerInterface $storeManagerInterface,
         \DamConsultants\BynderDAM\Model\BynderConfigSyncDataFactory $byndersycData,
         \DamConsultants\BynderDAM\Model\BynderMediaTableFactory $bynderMediaTable,
         BynderMediaTableCollectionFactory $bynderMediaTableCollectionFactory,
+		MagentoSkuCollectionFactory $magentoSkuCollectionFactory,
+		MagentoSku $magentoSku,
         \Magento\Catalog\Model\Product $product,
         \Magento\Catalog\Model\ProductRepository $productRepository,
         MetaPropertyCollectionFactory $metaPropertyCollectionFactory,
         \DamConsultants\BynderDAM\Helper\Data $DataHelper,
         \Magento\Framework\Controller\Result\JsonFactory $jsonFactory,
-        \Magento\Framework\App\ResourceConnection $resource
+        ResourceConnection $resource
     ) {
-        parent::__construct($context);
         $this->resultJsonFactory = $jsonFactory;
         $this->productAction = $action;
         $this->storeManagerInterface = $storeManagerInterface;
         $this->metaPropertyCollectionFactory = $metaPropertyCollectionFactory;
-        $this->datahelper = $DataHelper;
-        $this->_resource = $resource;
         $this->bynderMediaTable = $bynderMediaTable;
         $this->bynderMediaTableCollectionFactory = $bynderMediaTableCollectionFactory;
+		$this->magentoSkuCollectionFactory = $magentoSkuCollectionFactory;
+        $this->datahelper = $DataHelper;
+		$this->magentoSku = $magentoSku;
         $this->_byndersycData = $byndersycData;
         $this->_productRepository = $productRepository;
         $this->product = $product;
+        $this->resource = $resource;
     }
-    /**
+
+   /**
      * Execute
      *
-     * @return $this
+     * @return boolean
      */
     public function execute()
     {
-        if (!$this->getRequest()->isAjax()) {
-            $this->_forward('noroute');
-            return '';
+		$skucollection = $this->magentoSkuCollectionFactory->create();
+        $skucollection->addFieldToFilter('status', 'pending')->setPageSize(100);
+		if ($skucollection->getSize() === 0) {
+            return $result->setData(['status' => 0, 'message' => 'No pending SKUs to process.']);
         }
-
         $property_id = null;
-        $product_sku = $this->getRequest()->getParam('product_sku');
-        $select_attribute = $this->getRequest()->getParam('select_attribute');
+        
         $result = $this->resultJsonFactory->create();
-       
+
         $collection = $this->metaPropertyCollectionFactory->create()->getData();
         $meta_properties = $this->getMetaPropertiesCollection($collection);
 
         $collection_value = $meta_properties['collection_data_value'];
         $collection_slug_val = $meta_properties['collection_data_slug_val'];
+		foreach ($skucollection as $skuData) {
+			$sku = $skuData['sku'];
+			if ($sku != "") {
+				$select_attribute = $skuData['select_attribute'];
+				$bd_sku = $this->datahelper->replacetoSpecialString($sku);
+				$storeIds = $this->storeManagerInterface->getStore()->getId();
+				$_product = $this->_productRepository->get($sku);
+				$product_ids = $_product->getId();
+				$get_data = $this->datahelper->getImageSyncWithProperties(
+					$bd_sku,
+					$property_id,
+					$collection_value
+				);
+				$getIsJson = $this->getIsJSON($get_data);
+				if (!empty($get_data) && $getIsJson) {
+					$respon_array = json_decode($get_data, true);
+					
+					if ($respon_array['status'] == 1) {
+						$convert_array = json_decode($respon_array['data'], true);
+						if ($convert_array['status'] == 1) {
+							$current_sku = $sku;
+							try {
+								$this->getDataItem(
+									$storeIds,
+									$select_attribute,
+									$convert_array,
+									$collection_slug_val,
+									$current_sku
+								);
+							} catch (Exception $e) {
+								$insert_data = [
+									"sku" => $sku,
+									"message" => $e->getMessage(),
+									"data_type" => "",
+									"lable" => 0
+								];
+								$this->getInsertDataTable($insert_data);
+							}
+						} else {
+							$updated_values = [
+								'bynder_multi_img' => null,
+								'bynder_isMain' => null,
+								'bynder_auto_replace' => null
+							];
 
-        if (strlen($product_sku) > 0) {
-            $productSku = explode(",", trim($product_sku));
-            if (count($productSku) > 0) {
-                foreach ($productSku as $sku) {
-                    if ($sku != "") {
-                        /*$bd_sku = trim(preg_replace('/[^A-Za-z0-9-]/', '_', $sku));*/
-                        $bd_sku = $this->datahelper->replacetoSpecialString($sku);
-                        $get_data = $this->datahelper->getImageSyncWithProperties($bd_sku, $property_id, $collection_value);
-                        $getIsJson = $this->getIsJSON($get_data);
-                        if (!empty($get_data) && $getIsJson) {
-                            $respon_array = json_decode($get_data, true);
-                            if ($respon_array['status'] == 1) {
-                                $convert_array = json_decode($respon_array['data'], true);
-                                if ($convert_array['status'] == 1) {
-                                    $current_sku = $sku;
-                                    try {
-                                        $this->getDataItem(
-                                            $select_attribute,
-                                            $convert_array,
-                                            $collection_slug_val,
-                                            $current_sku
-                                        );
-                                    } catch (Exception $e) {
-                                        $insert_data = [
-                                            "sku" => $sku,
-                                            "message" => $e->getMessage(),
-                                            "data_type" => "",
-                                            "lable" => "0"
-                                        ];
-                                        $this->getInsertDataTable($insert_data);
-                                    }
-                                    
-                                } else {
-                                    $insert_data = [
-                                        "sku" => $sku,
-                                        "message" => $convert_array['data'],
-                                        "data_type" => "",
-                                        "lable" => "0"
-                                    ];
-                                    $this->getInsertDataTable($insert_data);
-                                    $product_id = $this->product->getIdBySku($sku);
-                                    $updated_values = [
-                                        'bynder_multi_img' => null,
-                                        'bynder_isMain' => null
-                                    ];
-                                    $storeId = $this->storeManagerInterface->getStore()->getId();
-                                    $this->productAction->updateAttributes(
-                                        [$product_id],
-                                        $updated_values,
-                                        $storeId
-                                    );
-                                }
-                            } else {
-                                $insert_data = [
-                                "sku" => $sku,
-                                "message" => 'Please Select The Metaproperty First.....',
-                                "data_type" => "",
-                                "lable" => "0"
-                                ];
-                                $this->getInsertDataTable($insert_data);
-                                $result_data = $result->setData(
-                                    ['status' => 0, 'message' => 'Please check Bynder Synchronization. Action Log.....']
-                                );
-                                return $result_data;
-                            }
-                        } else {
-                            $result_data = $result->setData(
-                                [
-                                    'status' => 0,
-                                    'message' => 'Something went wrong from API side, Please contact to support team!'
-                                ]
-                            );
-                            return $result_data;
-                        }
-                    }
-                }
-            }
-            $result_data = $result->setData([
-                'status' => 1,
-                'message' => 'Data Sync Successfully.Please check Bynder Synchronization Log.!'
-            ]);
-            return $result_data;
-        } else {
-            $result_data = $result->setData(['status' => 0, 'message' => 'Please enter atleast one SKU.']);
-            return $result_data;
-        }
+							if ($select_store == 'all_store') {
+								$this->productAction->updateAttributes(
+									[$product_ids],
+									$updated_values,
+									$storeIds
+								);
+								$all_stores = $this->getMyStoreId();
+								if (count($all_stores) > 0) {
+									foreach ($all_stores as $storeId) {
+										$this->productAction->updateAttributes(
+											[$product_ids],
+											$updated_values,
+											$storeId
+										);
+									}
+								}
+							} else {
+								$this->productAction->updateAttributes(
+									[$product_ids],
+									$updated_values,
+									$select_store
+								);
+							}
+							$insert_data = [
+								"sku" => $sku,
+								"message" => $convert_array['data'],
+								"data_type" => "",
+								"lable" => "0"
+							];
+							$this->getInsertDataTable($insert_data);
+						}
+					} else {
+						$insert_data = [
+							"sku" => $sku,
+							"message" => 'Please Select The Metaproperty First.....',
+							"data_type" => "",
+							"lable" => 0
+						];
+						$this->getInsertDataTable($insert_data);
+						$result_data = $result->setData(
+							['status' => 0, 'message' => 'Please check Bynder Synchronization. Action Log.....']
+						);
+						return $result_data;
+					}
+				} else {
+					$result_data = $result->setData(
+						[
+							'status' => 0,
+							'message' => 'Something went wrong from API side, Please contact to support team!'
+						]
+					);
+					return $result_data;
+				}
+			}
+			$this->magentoSku->delete($skuData);
+		}
+		$result_data = $result->setData([
+			'status' => 1,
+			'message' => 'Data Sync Successfully.Please check Bynder Synchronization Log.!'
+		]);
+		return $result_data;
     }
 
     /**
@@ -325,11 +328,21 @@ class Psku extends \Magento\Backend\App\Action
         $updated_values = [
             'bynder_delete_cron' => 1
         ];
-        $this->productAction->updateAttributes(
-            [$product_ids],
-            $updated_values,
-            $storeId
-        );
+        try{
+            $this->productAction->updateAttributes(
+                [$product_ids],
+                $updated_values,
+                $storeId
+            );
+        }catch(Exception $e){
+            $insert_data = [
+                "sku" => $sku,
+                "message" => $e->getMessage(),
+                'media_id' => "",
+                "data_type" => ""
+            ];
+            $this->getInsertDataTable($insert_data);
+        }
     }
     /**
      * Is Json
@@ -340,44 +353,55 @@ class Psku extends \Magento\Backend\App\Action
      */
     public function getDeleteMedaiDataTable($sku, $media_id)
     {
-        $model = $this->bynderMediaTableCollectionFactory->create()->addFieldToFilter('sku', ['eq' => [$sku]])->load();
+        $model = $this->bynderMediaTableCollectionFactory->create();
+        $model->addFieldToFilter('sku', ['eq' => [$sku]])->load();
         foreach ($model as $mdata) {
             if ($mdata['media_id'] != $media_id) {
                 $this->bynderMediaTable->create()->load($mdata['id'])->delete();
-
             }
         }
     }
     /**
      * Get Data Item
      *
+     * @param string $select_store
      * @param string $select_attribute
      * @param array $convert_array
      * @param array $collection_data_slug_val
      * @param array $current_sku
+     * @return this
      */
-    public function getDataItem($select_attribute, $convert_array, $collection_data_slug_val, $current_sku)
+    public function getDataItem($select_store, $select_attribute, $convert_array, $collection_data_slug_val, $current_sku)
     {
         $data_arr = [];
+        $video_data_arr = [];
+        $doc_data_arr = [];
         $data_val_arr = [];
-		$doc_data_arr = [];
+        $video_data_val_arr = [];
+        $doc_data_val_arr = [];
+        $temp_arr = [];
+        $bynder_image_role = [];
+        $is_order = [];
         $result = $this->resultJsonFactory->create();
         if ($convert_array['status'] == 1) {
+            $assets_extra_details = [];
+            $assets_extra_details_video = array();
+            $assets_extra_details_doc = array();
             foreach ($convert_array['data'] as $k => $data_value) {
                 if ($select_attribute == $data_value['type']) {
-                    $bynder_media_id = $data_value['id'];
-                    $image_data = $data_value['thumbnails'];
-                    $bynder_image_role = $image_data['magento_role_options'];
-                    $bynder_alt_text = $image_data['img_alt_text'];
-                    $sku_slug_name = "property_" . $collection_data_slug_val['sku']['bynder_property_slug'];
-                    $data_sku[0] = $current_sku;
-                    /*Below code for multiple derivative according to image roll */
-                    $images_urls_list = [];
-                    $new_magento_role_list = [];
-                    $new_bynder_alt_text =[];
-                    $new_bynder_mediaid_text = [];
-                    $new_image_role = [];
-                    if (count($bynder_image_role) > 0) {
+					$bynder_media_id = $data_value['id'];
+					$image_data = $data_value['thumbnails'];
+					$bynder_image_role = $image_data['magento_role_options'];
+					$bynder_alt_text = $image_data['img_alt_text'];
+					$sku_slug_name = "property_" . $collection_data_slug_val['sku']['bynder_property_slug'];
+					$data_sku[0] = $current_sku;
+					/*Below code for multiple derivative according to image roll */
+					$images_urls_list = [];
+					$new_magento_role_list = [];
+					$new_bynder_alt_text =[];
+					$new_bynder_mediaid_text = [];
+					$new_image_role = [];
+					if (count($bynder_image_role) > 0) {
                         foreach ($bynder_image_role as $m_bynder_role) {
                             if ($m_bynder_role == 0) {
                                 $new_image_role = ['Base', 'Small', 'Thumbnail', 'Swatch'];
@@ -416,7 +440,7 @@ class Psku extends \Magento\Backend\App\Action
                         }
                         $new_bynder_mediaid_text[] = $bynder_media_id."\n";
                     }
-                    if ($data_value['type'] == "image") {
+					if ($data_value['type'] == "image") {
                         $image_link = isset($data_value['derivatives'][0]['public_url']) ? $data_value['derivatives'][0]['public_url'] : $data_value['original'];
                         array_push($data_arr, $data_sku[0]);
                         $data_p = [
@@ -458,7 +482,7 @@ class Psku extends \Magento\Backend\App\Action
                         }
     
                     }
-                } elseif($select_attribute == 'all_attribute') {
+				} elseif($select_attribute == 'all_attribute') {
 					$bynder_media_id = $data_value['id'];
                     $image_data = $data_value['thumbnails'];
                     $bynder_image_role = $image_data['magento_role_options'];
@@ -552,26 +576,28 @@ class Psku extends \Magento\Backend\App\Action
                         }
 					}
 				}
-            }
+			}
         }
-		
-		if (count($data_arr) > 0) {
-			$this->getProcessItem($data_arr, $data_val_arr);
-		} elseif(count($doc_data_arr) > 0) {
-			$this->getProcessItemDoc($doc_data_arr, $data_val_arr);
-		} else {
-			$result_data = $result->setData(['status' => 0, 'message' => 'No Data Found...']);
-			return $result_data;
-		}
+        if ($select_attribute == 'image' || $select_attribute == 'video' || $select_attribute == 'document') {
+            if (count($data_arr) > 0) {
+				$this->getProcessItem($data_arr, $data_val_arr, $select_attribute);
+            } elseif (count($doc_data_arr) > 0) {
+                $this->getProcessItemDoc($select_attribute, $doc_data_arr, $data_val_arr);
+            } else {
+				$result_data = $result->setData(['status' => 0, 'message' => 'No Data Found...']);
+                return $result_data;
+			}
+        }
     }
     /**
      * Get Process Item
      *
      * @param array $data_arr
      * @param array $data_val_arr
+	 * @param string $select_attribute
      * @return $this
      */
-    public function getProcessItem($data_arr, $data_val_arr)
+	public function getProcessItem($data_arr, $data_val_arr, $select_attribute)
     {
         $result = $this->resultJsonFactory->create();
         $image_value_details_role = [];
@@ -591,7 +617,8 @@ class Psku extends \Magento\Backend\App\Action
                 $product_sku_key,
                 $mg_role,
                 $image_alt_text_value,
-                $byn_md_id_new
+                $byn_md_id_new,
+				$select_attribute
             );
         }
     }
@@ -600,9 +627,10 @@ class Psku extends \Magento\Backend\App\Action
      *
      * @param array $data_arr
      * @param array $data_val_arr
+	 * @param string $select_attribute
      * @return $this
      */
-    public function getProcessItemDoc($data_arr, $data_val_arr)
+    public function getProcessItemDoc($data_arr, $data_val_arr, $select_attribute)
     {
         $result = $this->resultJsonFactory->create();
         $image_value_details_role = [];
@@ -622,7 +650,8 @@ class Psku extends \Magento\Backend\App\Action
                 $product_sku_key,
                 $mg_role,
                 $image_alt_text_value,
-                $byn_md_id_new
+                $byn_md_id_new,
+				$select_attribute
             );
         }
     }
@@ -635,11 +664,12 @@ class Psku extends \Magento\Backend\App\Action
      * @param string $mg_img_role_option
      * @param string $img_alt_text
      * @param string $bynder_media_ids
+	 * @param string $select_attribute
      */
-    public function getUpdateDoc($img_json, $product_sku_key, $mg_img_role_option, $img_alt_text, $bynder_media_ids)
+    public function getUpdateDoc($img_json, $product_sku_key, $mg_img_role_option, $img_alt_text, $bynder_media_ids, $select_attribute)
     {
         $result = $this->resultJsonFactory->create();
-        $select_attribute = $this->getRequest()->getParam('select_attribute');
+        //$select_attribute = $this->getRequest()->getParam('select_attribute');
         $image_detail = [];
         $video_detail = [];
         $diff_image_detail = [];
@@ -664,13 +694,13 @@ class Psku extends \Magento\Backend\App\Action
 						"bynder_md_id" => $bynder_media_id[$vv]
 					];
 					$data_doc_value = [
-								'sku' => $product_sku_key,
-								'message' => $doc_name[0],
-								'data_type' => '2',
-								'media_id' => $bynder_media_id[$vv],
-								'lable' => 1
-							];
-							$this->getInsertDataTable($data_doc_value);
+						'sku' => $product_sku_key,
+						'message' => $doc_name[0],
+						'data_type' => '2',
+						'media_id' => $bynder_media_id[$vv],
+						'lable' => 1
+					];
+					$this->getInsertDataTable($data_doc_value);
 				}
 				$new_value_array = json_encode($doc_detail, true);
 				
@@ -738,11 +768,12 @@ class Psku extends \Magento\Backend\App\Action
      * @param string $mg_img_role_option
      * @param string $img_alt_text
      * @param string $bynder_media_ids
+	 * @param string $select_attribute
      */
-    public function getUpdateImage($img_json, $product_sku_key, $mg_img_role_option, $img_alt_text, $bynder_media_ids)
+    public function getUpdateImage($img_json, $product_sku_key, $mg_img_role_option, $img_alt_text, $bynder_media_ids, $select_attribute)
     {
         $result = $this->resultJsonFactory->create();
-        $select_attribute = $this->getRequest()->getParam('select_attribute');
+        //$select_attribute = $this->getRequest()->getParam('select_attribute');
         $image_detail = [];
         $video_detail = [];
         $diff_image_detail = [];
@@ -1255,6 +1286,20 @@ class Psku extends \Magento\Backend\App\Action
                                     "bynder_md_id" => $bynder_media_id[$vv],
                                     "is_import" => 0
                                 ];
+								$total_new_values = count($image_detail);
+                                if ($total_new_values > 1) {
+                                    foreach ($image_detail as $nn => $n_img) {
+                                        if ($n_img['item_type'] == "IMAGE" && $nn != ($total_new_values - 1)) {
+                                            if ($new_magento_role_option_array[$vv] != "###") {
+                                                $new_mg_role_array = (array)$new_magento_role_option_array[$vv];
+                                                if (count($n_img["image_role"])>0 && count($new_mg_role_array)>0) {
+                                                    $result_val=array_diff($n_img["image_role"], $new_mg_role_array);
+                                                    $image_detail[$nn]["image_role"] = $result_val;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                                 if (!in_array($item_url[0], $all_item_url)) {
                                     $diff_image_detail[] = [
                                         "item_url" => $new_image_value,

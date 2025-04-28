@@ -2,50 +2,78 @@
 
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">  
    <menu>
-       <add id="DamConsultants_BynderDAM::menu"
+		<add id="DamConsultants_BynderDAM::menu"
            title="BynderDAM Sync. Log" module="DamConsultants_BynderDAM"
            sortOrder="10"
            resource="Magento_Backend::content"
            />
            <!-- START: new node -->
-       <add id="DamConsultants_BynderDAM::menu_item"
-           title="Cron Action Log" module="DamConsultants_BynderDAM"
+		<add id="DamConsultants_BynderDAM::menu_item5"
+           title="Meta properties setting" module="DamConsultants_BynderDAM"
            sortOrder="10" parent="DamConsultants_BynderDAM::menu"
-           action="bynder/index/grid"
-           resource="DamConsultants_BynderDAM::menu_item"
+           resource="DamConsultants_BynderDAM::menu_item5"
            />
-       <!-- END:   new node -->
-        <!-- START: new node -->
-       <add id="DamConsultants_BynderDAM::menu_item3"
-           title="Replace Cron Action Log" module="DamConsultants_BynderDAM"
-           sortOrder="10" parent="DamConsultants_BynderDAM::menu"
-           action="bynder/index/replacecrongrid"
-           resource="DamConsultants_BynderDAM::menu_item3"
-           />
-       <!-- END:   new node -->
-       <!-- START: new node -->
-       <add id="DamConsultants_BynderDAM::menu_item2"
-           title="Synchronization Log" module="DamConsultants_BynderDAM"
-           sortOrder="10" parent="DamConsultants_BynderDAM::menu"
-           action="bynder/index/sync"
-           resource="DamConsultants_BynderDAM::menu_item2"
-           />
-       <!-- END:   new node -->
-        <!-- START: new node -->
-       <add id="DamConsultants_BynderDAM::menu_item1"
-           title="BynderDAM MetaProperty " module="DamConsultants_BynderDAM"
-           sortOrder="10" parent="DamConsultants_BynderDAM::menu"
+		   
+		<add id="DamConsultants_BynderDAM::menu_item1"
+           title="DAM MetaProperty " module="DamConsultants_BynderDAM"
+           sortOrder="10" parent="DamConsultants_BynderDAM::menu_item5"
            action="bynder/index/metaproperty"
            resource="DamConsultants_BynderDAM::menu_item1"
            />
-       <!-- END:   new node -->
-	   <!-- START: new node -->
-       <add id="DamConsultants_BynderDAM::menu_item4"
-           title="Delete Cron Action Log" module="DamConsultants_BynderDAM"
+		  
+		<add id="DamConsultants_BynderDAM::menu_item6"
+           title="Cron Log" module="DamConsultants_BynderDAM"
            sortOrder="10" parent="DamConsultants_BynderDAM::menu"
+           resource="DamConsultants_BynderDAM::menu_item6"
+           />
+       <add id="DamConsultants_BynderDAM::menu_item"
+           title="Cron Action Log" module="DamConsultants_BynderDAM"
+           sortOrder="10" parent="DamConsultants_BynderDAM::menu_item6"
+           action="bynder/index/grid"
+           resource="DamConsultants_BynderDAM::menu_item"
+           />
+		<add id="DamConsultants_BynderDAM::menu_item3"
+           title="Replace Cron Action Log" module="DamConsultants_BynderDAM"
+           sortOrder="10" parent="DamConsultants_BynderDAM::menu_item6"
+           action="bynder/index/replacecrongrid"
+           resource="DamConsultants_BynderDAM::menu_item3"
+           />
+		<add id="DamConsultants_BynderDAM::menu_item4"
+           title="Delete Cron Action Log" module="DamConsultants_BynderDAM"
+           sortOrder="10" parent="DamConsultants_BynderDAM::menu_item6"
            action="bynder/index/deletecrongrid"
            resource="DamConsultants_BynderDAM::menu_item4"
            />
        <!-- END:   new node -->
+       <!-- START: new node -->
+	   
+	   <add id="DamConsultants_BynderDAM::menu_item7"
+           title="Manual sync Log" module="DamConsultants_BynderDAM"
+           sortOrder="10" parent="DamConsultants_BynderDAM::menu"
+           resource="DamConsultants_BynderDAM::menu_item6"
+           />
+       <add id="DamConsultants_BynderDAM::menu_item2"
+           title="Synchronization Log" module="DamConsultants_BynderDAM"
+           sortOrder="10" parent="DamConsultants_BynderDAM::menu_item7"
+           action="bynder/index/sync"
+           resource="DamConsultants_BynderDAM::menu_item2"
+           />
+        <add id="DamConsultants_BynderDAM::menu_item9"
+           title="Check Sku Log" module="DamConsultants_BynderDAM"
+           sortOrder="10" parent="DamConsultants_BynderDAM::menu_item7"
+           action="bynder/index/sku"
+           resource="DamConsultants_BynderDAM::menu_item9"
+           />
+       <!-- END:   new node -->
+        <!-- START: new node -->
+       
+		
+       <!-- END:   new node -->
+	    <add id="DamConsultants_BynderDAM::menu_item8"
+           title="Configuration Settings" module="DamConsultants_BynderDAM"
+           sortOrder="10" parent="DamConsultants_BynderDAM::menu"
+           resource="DamConsultants_BynderDAM::menu_item6"
+           />
+       <add id="DamConsultants_BynderDAM::settings" title="Configuration" module="DamConsultants_BynderDAM" sortOrder="10" resource="Magento_Backend::content" parent="DamConsultants_BynderDAM::menu_item8" action="adminhtml/system_config/edit/section/bynderconfig"/>
    </menu>
 </config> 

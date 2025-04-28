@@ -609,6 +609,20 @@ class AutoAddFromMagento
                                     "bynder_md_id" => $bynder_media_ids[$vv],
                                     "is_import" => 0
                                 ];
+								$total_new_values = count($image_detail);
+                                if ($total_new_values > 1) {
+                                    foreach ($image_detail as $nn => $n_img) {
+                                        if ($n_img['item_type'] == "IMAGE" && $nn != ($total_new_values - 1)) {
+                                            if ($new_magento_role_option_array[$vv] != "###") {
+                                                $new_mg_role_array = (array)$new_magento_role_option_array[$vv];
+                                                if (count($n_img["image_role"])>0 && count($new_mg_role_array)>0) {
+                                                    $result_val=array_diff($n_img["image_role"], $new_mg_role_array);
+                                                    $image_detail[$nn]["image_role"] = $result_val;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                                 if (!in_array($item_url[0], $all_item_url)) {
                                     $logger->info("diff_image_detail => ". $new_image_value);
                                     $diff_image_detail[] = [
@@ -771,7 +785,8 @@ class AutoAddFromMagento
                     $logger->info("new_image_detail => ". json_encode($new_image_detail));
                     $merge_img_video = array_merge($new_image_detail, $new_video_detail);
                     $merge_diff_img_video = array_merge($diff_video_detail, $diff_image_detail);
-                    $array_merge = array_merge($merge_img_video, $merge_diff_img_video);
+                    //$array_merge = array_merge($merge_img_video, $merge_diff_img_video);
+					$array_merge = array_merge($image_detail,  $video_detail);
                     $logger->info("array_merge => ". json_encode($array_merge));
                     $m_id = [];
                     $types = [];
