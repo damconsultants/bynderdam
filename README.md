@@ -11,4 +11,4 @@ Magento 2 BynderDAM Extension gives you a great opportunity to upload more “im
     1.4.3. php bin/magento setup:static-content:deploy
     
 2) Using Composer
-      composer require damconsultants/bynderdam:1.0.17
+      composer require damconsultants/bynderdam:1.0.18
