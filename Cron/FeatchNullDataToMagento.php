@@ -632,7 +632,7 @@ class FeatchNullDataToMagento
             }
             if ($types == 'document') {
                 if(empty($doc_value)) {
-                    $new_doc_array = explode(" \n", $img_json);
+                    $new_doc_array = explode("\n", $img_json);
                     $doc_detail = [];
                     foreach ($new_doc_array as $vv => $doc_value) {
                         $item_url = explode("?", $doc_value);

@@ -1027,7 +1027,7 @@ class Psku extends \Magento\Backend\App\Action
                 }
             } elseif ($select_attribute == "video") {
                 if (!empty($image_value)) {
-                    $new_video_array = explode(" \n", $img_json);
+                    $new_video_array = explode("\n", $img_json);
                     $old_value_array = json_decode($image_value, true);
                     $old_item_url = [];
                     $old_image_details = [];
@@ -1088,7 +1088,7 @@ class Psku extends \Magento\Backend\App\Action
                         $storeId
                     );
                 } else {
-                    $new_video_array = explode(" \n", $img_json);
+                    $new_video_array = explode("\n", $img_json);
                     $video_detail = [];
                     foreach ($new_video_array as $vv => $video_value) {
                         $find_video = strpos($video_value, "@@");
@@ -1141,7 +1141,7 @@ class Psku extends \Magento\Backend\App\Action
                 }
             } elseif ($select_attribute == "document") {
                 if (empty($doc_value)) {
-                    $new_doc_array = explode(" \n", $img_json);
+                    $new_doc_array = explode("\n", $img_json);
                     $doc_detail = [];
                     foreach ($new_doc_array as $vv => $doc_value) {
                         //$item_url = explode("?", $doc_value);
