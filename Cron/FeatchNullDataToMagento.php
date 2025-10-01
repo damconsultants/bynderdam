@@ -366,6 +366,8 @@ class FeatchNullDataToMagento
     {
         $data_arr = [];
         $data_val_arr = [];
+		$plp_over_img = "";
+		$pdp_img = "";
         if ($convert_array['status'] == 1) {
             foreach ($convert_array['data'] as $data_value) {
                 $bynder_media_id = $data_value['id'];
@@ -418,48 +420,68 @@ class FeatchNullDataToMagento
                     $new_bynder_mediaid_text[] = $bynder_media_id."\n";
                 }
                 if ($data_value['type'] == "image") {
-                    $image_link = isset($data_value['derivatives'][0]['public_url']) ? $data_value['derivatives'][0]['public_url'] : $data_value['original'];
-                    array_push($data_arr, $data_sku[0]);
-                    $data_p = [
-                        "sku" => $data_sku[0],
-                        "url" => [$image_link."\n"], /* chagne by kuldip ladola for testing perpose */
-                        'magento_image_role' => $new_image_role,
-                        'image_alt_text' => $new_bynder_alt_text,
-                        'bynder_media_id_new' => $new_bynder_mediaid_text,
-                        "type" => "image"
-                    ];
-                    array_push($data_val_arr, $data_p);
-                } else {
-                    if ($data_value['type'] == 'video') {
-                        $video_link = $data_value["original"] . '@@' . $image_data["webimage"];
-                        array_push($data_arr, $data_sku[0]);
-                        $data_p = [
-                            "sku" => $data_sku[0],
-                            "url" => [$video_link. "\n"],
-                            'magento_image_role' => $new_image_role,
-                            'image_alt_text' => $new_bynder_alt_text,
-                            'bynder_media_id_new' => $new_bynder_mediaid_text,
-                            "type" => "video"
-                        ];
-                        array_push($data_val_arr, $data_p);
+					$image_link = "";
 
-                    } else {
-                        $doc_name = $data_value["name"];
-                        $doc_name_with_space = preg_replace("/[^a-zA-Z]+/", "-", $doc_name);
-                        $doc_link = $data_value["original"] . '@@' . $doc_name_with_space;
-                        array_push($data_arr, $data_sku[0]);
-                        $data_p = [
-                            "sku" => $data_sku[0],
-                            "url" => [$doc_link],
-                            'magento_image_role' => $new_image_role,
-                            'image_alt_text' => $new_bynder_alt_text,
-                            'bynder_media_id_new' => $new_bynder_mediaid_text,
-                            "type" => "document"
-                        ];
-                        array_push($data_val_arr, $data_p);
-                    }
+					if (!empty($data_value['derivatives']) && is_array($data_value['derivatives'])) {
+						foreach ($data_value['derivatives'] as $derivative) {
+							if (!$image_link && !empty($derivative['public_url'])) {
+								$image_link = $derivative['public_url'];
+							}
+							if (!$plp_over_img && !empty($derivative['plp_over_img'])) {
+								$plp_over_img = $derivative['plp_over_img'];
+							}
+							if (!$pdp_img && !empty($derivative['pdp_img'])) {
+								$pdp_img = $derivative['pdp_img'];
+							}
 
-                }
+							if ($image_link && $plp_over_img && $pdp_img) {
+								break; // all found, exit loop early
+							}
+						}
+					} else {
+						$image_link = $data_value['original'] ?? "";
+					}
+
+					$url = [$image_link . "\n"];
+					$plp_over_img_url = [$plp_over_img . "\n"];
+					$pdp_img_url = [$pdp_img . "\n"];
+					$type = "image";
+
+				} elseif ($data_value['type'] == "video") {
+					$video_link = ($data_value["original"] ?? "") . '@@' . ($image_data["webimage"] ?? "");
+					$url = [$video_link . "\n"];
+					$plp_over_img_url = [$plp_over_img . "\n"];
+					$pdp_img_url = [$pdp_img . "\n"];
+					$type = "video";
+
+				} else {
+					$doc_name = $data_value["name"] ?? "";
+					$doc_name_with_space = preg_replace("/[^a-zA-Z]+/", "-", $doc_name);
+					$doc_link = ($data_value["original"] ?? "") . '@@' . $doc_name_with_space . "\n";
+					$url = [$doc_link];
+					$plp_over_img_url = [$plp_over_img . "\n"];
+					$pdp_img_url = [$pdp_img . "\n"];
+					$type = "doc";
+				}
+
+				array_push($data_arr, $data_sku[0]);
+
+				$data_p = [
+					"sku" => $data_sku[0],
+					"url" => $url,
+					"plp_over_img" => $plp_over_img_url,
+					"pdp_img" => $pdp_img_url,
+					"magento_image_role" => $new_image_role,
+					"image_alt_text" => $new_bynder_alt_text,
+					"bynder_media_id_new" => $new_bynder_mediaid_text,
+					"type" => $type
+				];
+
+				// Add type only for non-image
+				if ($type !== "image") {
+					$data_p["type"] = $type;
+				}
+				array_push($data_val_arr, $data_p);
             }
         }
         if (count($data_arr) > 0) {
@@ -482,18 +504,24 @@ class FeatchNullDataToMagento
             $image_alt_text[$skus][] = implode("", $data_val_arr[$key]["image_alt_text"]);
             $byn_md_id_new[$skus][] = implode("", $data_val_arr[$key]["bynder_media_id_new"]);
             $types = $data_val_arr[$key]['type'];
+			$plp_over_img_value[$skus][] = implode("", $data_val_arr[$key]["plp_over_img"]);
+			$pdp_img_value[$skus][] = implode("", $data_val_arr[$key]["pdp_img"]);
         }
         foreach ($temp_arr as $product_sku_key => $image_value) {
             $img_json = implode("", $image_value);
             $mg_role = $image_value_details_role[$product_sku_key];
             $image_alt_text_value = implode("", $image_alt_text[$product_sku_key]);
+			$plp_over = implode("", $plp_over_img_value[$product_sku_key]);
+			$pdp_img = implode("", $pdp_img_value[$product_sku_key]);
             $this->getUpdateImage(
                 $img_json,
                 $product_sku_key,
                 $mg_role,
                 $image_alt_text_value,
                 $byn_md_id_new,
-                $types
+                $types,
+				$plp_over,
+				$pdp_img
             );
         }
     }
@@ -507,8 +535,10 @@ class FeatchNullDataToMagento
      * @param string $img_alt_text
      * @param string $bynder_media_ids
      * @param string $types
+	 * @param string $plp_over_img_value
+	 * @param string $pdp_img_value
      */
-    public function getUpdateImage($img_json, $product_sku_key, $mg_img_role_option, $img_alt_text, $bynder_media_ids, $types)
+    public function getUpdateImage($img_json, $product_sku_key, $mg_img_role_option, $img_alt_text, $bynder_media_ids, $types, $plp_over_img_value, $pdp_img_value)
     {
         $model = $this->_byndersycData->create();
         $image_detail = [];
@@ -525,6 +555,8 @@ class FeatchNullDataToMagento
                     $new_image_array = explode("\n", $img_json);
                     $new_alttext_array = explode("\n", $img_alt_text);
                     $new_magento_role_option_array = $mg_img_role_option;
+					$plp_over_img = explode("\n", $plp_over_img_value);
+					$pdp_img = explode("\n", $pdp_img_value);
                     foreach ($new_image_array as $vv => $image_value) {
                         if (trim($image_value) != "" && $image_value != "no image") {
                             $img_altText_val = "";
@@ -541,6 +573,8 @@ class FeatchNullDataToMagento
                             if (!$find_video) {
                                 $image_detail[] = [
                                     "item_url" => $image_value,
+									"plp_over_img_value" => $plp_over_img[$vv],
+									"pdp_img_value" => $pdp_img[$vv],
                                     "alt_text" => $img_altText_val,
                                     "image_role" => $curt_img_role,
                                     "item_type" => 'IMAGE',
